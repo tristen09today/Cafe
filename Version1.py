@@ -1,8 +1,9 @@
 #Version 1 of the app should be a simple console program with no GUI.
-#make sure to use constants for variables that are used in the program
 #year eligibility for the app is 9-13
 
+#Constants
 YEAR_ELIGIBILITY = [9, 10, 11, 12, 13]
+MENU_FILE  = "menu.txt" #Path to the menu file
 
 year_level=int(input("Enter your year level: "))
 if year_level in YEAR_ELIGIBILITY:
@@ -29,6 +30,10 @@ def load_menu():
 #function to display the menu in a nice format
 def display_menu(menu_items):
     print("Café Menu:")
+    #sort the menu items by number
     for number in sorted(menu_items):
         item = menu_items[number]
         print(f"{number}. {item['name']} - ${item['price']:.2f}")
+
+menu_items = load_menu()
+display_menu(menu_items)
