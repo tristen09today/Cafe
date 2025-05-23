@@ -14,19 +14,19 @@ else:
 
 #functions to load the menu items from a text file to a dictionary
 def load_menu():
-    menu_items = {}
+    menu_items = {} #Dictionary to store menu items
     with open(MENU_FILE, "r") as file:
         for line in file:
-            line = line.strip()
+            line = line.strip() #To help remove any spaces
             if not line or line.startswith("#"):
                 continue
-            number, name, price = line.split(",")
+            number, name, price = line.split(",") #store item name and price in a list
             menu_items[int(number)] = {
                 "name": name.strip(),
                 "price": float(price.strip())
             }
     return menu_items
-
+#function to display the menu in a nice format
 def display_menu(menu_items):
     print("Café Menu:")
     for number in sorted(menu_items):
