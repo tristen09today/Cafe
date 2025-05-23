@@ -13,8 +13,16 @@ else:
 
 #display the menu thorugh a text file
 
-def display_menu():
-    with open("menu.txt", "r") as file:
-        menu = file.read()
-    print(menu)
-display_menu()
+def load_menu():
+    menu_items = {}
+    with open(MENU_FILE, "r") as file:
+        for line in file:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            number, name, price = line.split(",")
+            menu_items[int(number)] = {
+                "name": name.strip(),
+                "price": float(price.strip())
+            }
+    return menu_items
