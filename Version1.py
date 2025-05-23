@@ -10,3 +10,11 @@ if year_level in YEAR_ELIGIBILITY:
 else:
     print("You are not eligible to use the app.")
     exit()
+
+#display the menu thorugh a text file
+
+def display_menu():
+    with open("menu.txt", "r") as file:
+        menu = file.read()
+    print(menu)
+display_menu()
