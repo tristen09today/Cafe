@@ -5,7 +5,7 @@
 YEAR_ELIGIBILITY = [9, 10, 11, 12, 13]
 MENU_FILE  = "menu.txt" #Path to the menu file
 
-year_level=int(input("Enter your year level: "))
+year_level=int(input("Enter year level: "))
 if year_level in YEAR_ELIGIBILITY:
     print("Welcome to the café app!")
 else:
@@ -34,7 +34,7 @@ def display_menu(menu_items):
     for number in sorted(menu_items):
         item = menu_items[number]
         print(f"{number}. {item['name']} - ${item['price']:.2f}")
-        
+
  # Get user order
 def get_order(menu_items):
     cart = {}
@@ -55,5 +55,19 @@ def get_order(menu_items):
             print("Please enter a valid number.")
     return cart
 
+# Display summary
+def display_summary(cart, menu_items):
+    print("\nOrder Summary:")
+    total = 0
+    for number, quantity in cart.items():
+        item = menu_items[number]
+        cost = item["price"] * quantity
+        print(f"{item['name']} x{quantity} = ${cost:.2f}")
+        total += cost
+    print(f"Total Price: ${total:.2f}")
+
+#main program flow
 menu_items = load_menu()
 display_menu(menu_items)
+cart = get_order(menu_items)
+display_summary(cart, menu_items)
