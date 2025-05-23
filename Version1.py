@@ -34,6 +34,26 @@ def display_menu(menu_items):
     for number in sorted(menu_items):
         item = menu_items[number]
         print(f"{number}. {item['name']} - ${item['price']:.2f}")
+        
+ # Get user order
+def get_order(menu_items):
+    cart = {}
+    while True:
+        try:
+            choice = int(input("\nEnter item number to order (0 to finish): "))
+            if choice == 0:
+                break
+            if choice not in menu_items:
+                print("Invalid item number.")
+                continue
+            quantity = int(input(f"Enter quantity for {menu_items[choice]['name']}: "))
+            if quantity <= 0:
+                print("Quantity must be at least 1.")
+                continue
+            cart[choice] = cart.get(choice, 0) + quantity
+        except ValueError:
+            print("Please enter a valid number.")
+    return cart
 
 menu_items = load_menu()
 display_menu(menu_items)
