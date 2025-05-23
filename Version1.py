@@ -11,8 +11,8 @@ else:
     print("You are not eligible to use the app.")
     exit()
 
-#display the menu thorugh a text file
 
+#functions to load the menu items from a text file to a dictionary
 def load_menu():
     menu_items = {}
     with open(MENU_FILE, "r") as file:
@@ -26,3 +26,9 @@ def load_menu():
                 "price": float(price.strip())
             }
     return menu_items
+
+def display_menu(menu_items):
+    print("Café Menu:")
+    for number in sorted(menu_items):
+        item = menu_items[number]
+        print(f"{number}. {item['name']} - ${item['price']:.2f}")
