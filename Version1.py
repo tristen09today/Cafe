@@ -3,14 +3,23 @@
 
 #Constants
 YEAR_ELIGIBILITY = [9, 10, 11, 12, 13]
+MAX_QUANTITY = 50  # Maximum allowed quantity per item
+MIN_QUANTITY = 1   # Minimum allowed quantity per item
 MENU_FILE  = "menu.txt" #Path to the menu file
 
-year_level=int(input("Enter year level: "))
-if year_level in YEAR_ELIGIBILITY:
-    print("Welcome to the café app!")
-else:
-    print("You are not eligible to use the app.")
-    exit()
+# Get year level input safely
+while True:
+    try:
+        year_level = int(input("Enter year level: "))
+        if year_level in YEAR_ELIGIBILITY:
+            print("Welcome to the café app!")
+            break
+        else:
+            print("You are not eligible to use the app!")
+            continue  # ERROR: Should be `exit()` to stop the program
+    except:
+        print("Please enter a valid number.")  # ERROR: Too generic; should catch ValueError only
+
 
 
 #functions to load the menu items from a text file to a dictionary
@@ -35,22 +44,32 @@ def display_menu(menu_items):
         item = menu_items[number]
         print(f"{number}. {item['name']} - ${item['price']:.2f}")
 
- # Get user order
+# Set a maximum quantity constant
+
+# Get user order
 def get_order(menu_items):
     cart = {}
     while True:
         try:
+            # ask user to enter item number and quantity
             choice = int(input("\nEnter item number to order (0 to finish): "))
-            if choice == 0:
+            if choice == 0:  # if user enters 0, finish the order
                 break
-            if choice not in menu_items:
+            if choice not in menu_items:  # check if item number is valid
                 print("Invalid item number.")
                 continue
+            # ask user to enter quantity
             quantity = int(input(f"Enter quantity for {menu_items[choice]['name']}: "))
-            if quantity <= 0:
+            if quantity < MIN_QUANTITY:  # lower boundary check
                 print("Quantity must be at least 1.")
                 continue
-            cart[choice] = cart.get(choice, 0) + quantity
+            elif quantity > MAX_QUANTITY:  # upper boundary check
+                print(f"You can order a maximum of {MAX_QUANTITY} per item.")
+                continue
+            else:
+                print(f"Adding {quantity} of {menu_items[choice]['name']} to your order.")
+                # update cart with item number and quantity using a dictionary
+                cart[choice] = cart.get(choice, 0) + quantity
         except ValueError:
             print("Please enter a valid number.")
     return cart
