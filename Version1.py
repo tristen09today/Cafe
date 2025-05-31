@@ -23,19 +23,22 @@ while True:
 
 
 #functions to load the menu items from a text file to a dictionary
+import csv
+
 def load_menu():
-    menu_items = {} #Dictionary to store menu items
+    menu_items = {} # Dictionary to hold menu items
     with open(MENU_FILE, "r") as file:
-        for line in file:
-            line = line.strip() #To help remove any spaces
-            if not line or line.startswith("#"):
+        reader = csv.reader(file)
+        for row in reader: # Read each row in the CSV file
+            if not row or row[0].startswith("#"):
                 continue
-            number, name, price = line.split(",") #store item name and price in a list
+            number, name, price = row # Unpack the row into number, name, and price
             menu_items[int(number)] = {
                 "name": name.strip(),
                 "price": float(price.strip())
             }
     return menu_items
+
 #function to display the menu in a nice format
 def display_menu(menu_items):
     print("Café Menu:")
@@ -90,3 +93,5 @@ menu_items = load_menu()
 display_menu(menu_items)
 cart = get_order(menu_items)
 display_summary(cart, menu_items)
+
+
