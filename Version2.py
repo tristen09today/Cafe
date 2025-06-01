@@ -1,4 +1,4 @@
-# Version 1 of the app should be a simple console program with no GUI.
+# Version 2 of the app should be more complex involving Easy GUI 
 # Year eligibility for the app is 9-13
 
 # Constants
@@ -85,8 +85,6 @@ menu_items = load_menu()
 display_menu(menu_items)
 cart = get_order(menu_items)
 display_summary(cart, menu_items)
-
-
 
 
 
