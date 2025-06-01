@@ -1,0 +1,16 @@
+# Sandwiches
+1,Cheese Toastie,4.50
+2,Ham Sandwich,5.00
+3,Chicken Wrap,6.50
+
+# Hot Food
+4,Hot Chips,3.50
+5,Meat Pie,4.00
+6,Mac and Cheese,5.50
+
+# Drinks
+7,Hot Chocolate,3.00
+8,Coffee,3.50
+9,Orange Juice,2.50
+10,Bottled Water,2.00
+
