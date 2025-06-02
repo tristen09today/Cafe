@@ -9,7 +9,7 @@ YEAR_ELIGIBILITY = [9, 10, 11, 12, 13]
 MAX_QUANTITY = 50
 MIN_QUANTITY = 1
 MENU_FILE  = "menu.txt"
-#Login system constants
+# Login system constants
 LOGIN_FILE = "Login.txt"
 LOGIN_ATTEMPS = 3
 MIN_PASS_LENGTH = 4
@@ -35,6 +35,13 @@ def load_users():
 def save_user(username, password):
     with open(LOGIN_FILE, "a") as file:
         file.write(f"{username},{password}\n")
+
+# Validate string length
+def is_valid_length(value, min_len, max_len, field_name):
+    if len(value) < min_len or len(value) > max_len:
+        msgbox(f"{field_name} must be between {min_len} and {max_len} characters.")
+        return False
+    return True
 
 # Helper for non-empty input
 def get_non_empty_input(prompt, is_password=False):
@@ -65,10 +72,15 @@ def login_system():
                 if username in users:
                     msgbox("That username already exists. Try a different one.")
                     continue
+                if not is_valid_length(username, MIN_USER_LENGTH, MAX_USER_LENGTH, "Username"):
+                    continue
 
                 password = get_non_empty_input("Create a password:", is_password=True)
                 if password is None:
                     break
+                if not is_valid_length(password, MIN_PASS_LENGTH, MAX_PASS_LENGTH, "Password"):
+                    continue
+
                 confirm = get_non_empty_input("Confirm your password:", is_password=True)
                 if confirm is None:
                     break
@@ -83,24 +95,22 @@ def login_system():
                 break
 
         elif action == "Log In":
-                
-                for attempt in range(LOGIN_ATTEMPS):
-                    username = get_non_empty_input("Enter your username:")
-                    if username is None:
-                        break  # Back to main menu
-                    password = get_non_empty_input("Enter your password:", is_password=True)
-                    if password is None:
-                        break
+            for attempt in range(LOGIN_ATTEMPS):
+                username = get_non_empty_input("Enter your username:")
+                if username is None:
+                    break  # Back to main menu
+                password = get_non_empty_input("Enter your password:", is_password=True)
+                if password is None:
+                    break
 
-                    if users.get(username) == password:
-                        msgbox(f"Welcome, {username}!")
-                        return  # Successful login
+                if users.get(username) == password:
+                    msgbox(f"Welcome, {username}!")
+                    return  # Successful login
 
-                    msgbox("Incorrect username or password.")
-                else:
-                    msgbox("Too many failed attempts. Exiting.")
-                    exit()
-
+                msgbox("Incorrect username or password.")
+            else:
+                msgbox("Too many failed attempts. Exiting.")
+                exit()
 
 # Load menu items
 def load_menu():
