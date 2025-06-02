@@ -8,9 +8,14 @@ import csv
 YEAR_ELIGIBILITY = [9, 10, 11, 12, 13]
 MAX_QUANTITY = 50
 MIN_QUANTITY = 1
-LOGIN_ATTEMPS = 3
 MENU_FILE  = "menu.txt"
+#Login system constants
 LOGIN_FILE = "Login.txt"
+LOGIN_ATTEMPS = 3
+MIN_PASS_LENGTH = 4
+MAX_PASS_LENGTH = 15
+MIN_USER_LENGTH = 3
+MAX_USER_LENGTH = 15
 
 # Ensure login file exists
 if not os.path.exists(LOGIN_FILE):
