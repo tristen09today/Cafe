@@ -1,90 +1,107 @@
 # Version 2 of the app should be more complex involving Easy GUI 
 # Year eligibility for the app is 9-13
+#import easygui
 from easygui import *
+#import csv
+import csv
+
 # Constants
 YEAR_ELIGIBILITY = [9, 10, 11, 12, 13]
 MAX_QUANTITY = 50  # Maximum allowed quantity per item
 MIN_QUANTITY = 1   # Minimum allowed quantity per item
 MENU_FILE  = "menu.txt"  # Path to the menu file
 
-# Get year level input safely
-while True:
-    try:
-        year_level = int(input("Enter year level: "))
-        if year_level in YEAR_ELIGIBILITY:
-            print("Welcome to the café app!")
-            break
-        else:
-            print("You are not eligible to use the app!")
-            exit()
-    except ValueError:
-        print("Please enter a valid number.")  # More specific error handling
-
-# Function to load the menu items from a text file to a dictionary
-import csv
-
+# Load menu items from file
 def load_menu():
-    menu_items = {}  # Dictionary to hold menu items
+    menu_items = {}
     with open(MENU_FILE, "r") as file:
         reader = csv.reader(file)
-        for row in reader:  # Read each row in the CSV file
+        for row in reader:
             if not row or row[0].startswith("#"):
                 continue
-            number, name, price = row  # Unpack the row into number, name, and price
+            number, name, price = row
             menu_items[int(number)] = {
                 "name": name.strip(),
                 "price": float(price.strip())
             }
     return menu_items
 
-# Function to display the menu in a nice format
-def display_menu(menu_items):
-    print("Café Menu:")
-    for number in sorted(menu_items):
-        item = menu_items[number]
-        print(f"{number}. {item['name']} - ${item['price']:.2f}")
-
-#Reusable quantity validation function
+# Validate quantity
 def is_valid_quantity(qty):
     return MIN_QUANTITY <= qty <= MAX_QUANTITY
 
-# Get user order
+# Ask year level using EasyGUI and validate
+def get_year_level():
+    while True:
+        year_str = enterbox("Enter your year level (9–13):", "Year Level Check")
+        if year_str is None:
+            msgbox("Exiting app.")
+            exit()
+        try:
+            year = int(year_str)
+            if year in YEAR_ELIGIBILITY:
+                msgbox("Welcome to the Café App!")
+                return year
+            else:
+                msgbox("You are not eligible to use the app!")
+                exit()
+        except ValueError:
+            msgbox("Please enter a valid number.")
+
+# Display menu using a textbox
+def display_menu(menu_items):
+    menu_text = "Café Menu:\n"
+    for number in sorted(menu_items):
+        item = menu_items[number]
+        menu_text += f"{number}. {item['name']} - ${item['price']:.2f}\n"
+    textbox("Menu", "Available Items", menu_text)
+
+# Take the order using buttonbox and enterbox
 def get_order(menu_items):
     cart = {}
+    item_choices = [f"{num}. {item['name']}" for num, item in menu_items.items()]
+    item_choices.append("Finish Order")
+
     while True:
+        choice_str = buttonbox("Select an item to order:", "Make Your Order", item_choices)
+        if choice_str == "Finish Order":
+            break
+        item_number = int(choice_str.split(".")[0])
+        qty_str = enterbox(f"Enter quantity for {menu_items[item_number]['name']} (1-50):")
+        if qty_str is None:
+            continue
         try:
-            choice = int(input("\nEnter item number to order (0 to finish): "))
-            if choice == 0:
-                break
-            if choice not in menu_items:
-                print("Invalid item number.")
-                continue
-            quantity = int(input(f"Enter quantity for {menu_items[choice]['name']}: "))
-            if not is_valid_quantity(quantity):
-                print(f"Quantity must be between {MIN_QUANTITY} and {MAX_QUANTITY}.")
-                continue
-            print(f"Adding {quantity} of {menu_items[choice]['name']} to your order.")
-            cart[choice] = cart.get(choice, 0) + quantity
+            qty = int(qty_str)
+            if is_valid_quantity(qty):
+                cart[item_number] = cart.get(item_number, 0) + qty
+                msgbox(f"Added {qty} of {menu_items[item_number]['name']} to your order.")
+            else:
+                msgbox(f"Quantity must be between {MIN_QUANTITY} and {MAX_QUANTITY}.")
         except ValueError:
-            print("Please enter a valid number.")
+            msgbox("Please enter a valid number.")
     return cart
 
-# Display summary
+# Display order summary
 def display_summary(cart, menu_items):
-    print("\nOrder Summary:")
+    if not cart:
+        msgbox("You have not ordered anything.")
+        return
+    summary = "Order Summary:\n"
     total = 0
     for number, quantity in cart.items():
         item = menu_items[number]
         cost = item["price"] * quantity
-        print(f"{item['name']} x{quantity} = ${cost:.2f}")
+        summary += f"{item['name']} x{quantity} = ${cost:.2f}\n"
         total += cost
-    print(f"Total Price: ${total:.2f}")
+    summary += f"\nTotal Price: ${total:.2f}"
+    textbox("Order Summary", "Your Order", summary)
 
-# Main program flow
-menu_items = load_menu()
-display_menu(menu_items)
-cart = get_order(menu_items)
-display_summary(cart, menu_items)
+# Program flow
+def main():
+    get_year_level()
+    menu_items = load_menu()
+    display_menu(menu_items)
+    cart = get_order(menu_items)
+    display_summary(cart, menu_items)
 
-
-
+main()
