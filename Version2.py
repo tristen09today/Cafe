@@ -1,8 +1,8 @@
 # Version 2 of the app should be more complex involving Easy GUI 
 # Year eligibility for the app is 9-13
-#import easygui
+#import easygui os and csv modules
 from easygui import *
-#import csv
+import os
 import csv
 
 # Constants
@@ -10,6 +10,64 @@ YEAR_ELIGIBILITY = [9, 10, 11, 12, 13]
 MAX_QUANTITY = 50  # Maximum allowed quantity per item
 MIN_QUANTITY = 1   # Minimum allowed quantity per item
 MENU_FILE  = "menu.txt"  # Path to the menu file
+LOGIN_FILE = "Login.txt" # Login data
+
+
+# Ensure the login file exists
+if not os.path.exists(LOGIN_FILE):
+    open(LOGIN_FILE, "w").close()
+
+# Load users from file
+def load_users():
+    users = {}
+    with open(LOGIN_FILE, "r") as file:
+        for line in file:
+            if line.strip():
+                username, password = line.strip().split(",")
+                users[username] = password
+    return users
+
+# Save new user to file
+def save_user(username, password):
+    with open(LOGIN_FILE, "a") as file:
+        file.write(f"{username},{password}\n")
+
+# Login or signup interface
+def login_system():
+    users = load_users()
+    while True:
+        action = buttonbox("Welcome to the Café App!\nDo you want to Log In or Sign Up?", "Login System", choices=["Log In", "Sign Up", "Exit"])
+        if action == "Exit":
+            msgbox("Exiting app. Goodbye!", "Exit")
+            exit()
+        elif action == "Sign Up":
+            while True:
+                username = enterbox("Create a new username:")
+                if not username:
+                    break
+                if username in users:
+                    msgbox("That username already exists. Try a different one.")
+                    continue
+                password = passwordbox("Create a password:")
+                confirm = passwordbox("Confirm your password:")
+                if password != confirm:
+                    msgbox("Passwords do not match. Try again.")
+                else:
+                    save_user(username, password)
+                    msgbox("Account created successfully!")
+                    break
+        elif action == "Log In":
+            for attempt in range(3):
+                username = enterbox("Enter your username:")
+                password = passwordbox("Enter your password:")
+                if users.get(username) == password:
+                    msgbox(f"Welcome, {username}!")
+                    return  # Exit the login system
+                else:
+                    msgbox("Incorrect username or password.")
+            msgbox("Too many failed attempts. Exiting.")
+            exit()
+
 
 # Load menu items from file
 def load_menu():
@@ -33,7 +91,7 @@ def is_valid_quantity(qty):
 # Ask year level using EasyGUI and validate
 def get_year_level():
     while True:
-        year_str = enterbox("Enter your year level (9–13):", "Year Level Check")
+        year_str = enterbox("Enter your year level: (9-13)")
         if year_str is None:
             msgbox("Exiting app.")
             exit()
@@ -98,6 +156,7 @@ def display_summary(cart, menu_items):
 
 # Program flow
 def main():
+    login_system()
     get_year_level()
     menu_items = load_menu()
     display_menu(menu_items)
