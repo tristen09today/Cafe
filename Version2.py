@@ -1,19 +1,17 @@
 # Version 2 of the app should be more complex involving Easy GUI 
 # Year eligibility for the app is 9-13
-#import easygui os and csv modules
 from easygui import *
 import os
 import csv
 
 # Constants
 YEAR_ELIGIBILITY = [9, 10, 11, 12, 13]
-MAX_QUANTITY = 50  # Maximum allowed quantity per item
-MIN_QUANTITY = 1   # Minimum allowed quantity per item
-MENU_FILE  = "menu.txt"  # Path to the menu file
-LOGIN_FILE = "Login.txt" # Login data
+MAX_QUANTITY = 50
+MIN_QUANTITY = 1
+MENU_FILE  = "menu.txt"
+LOGIN_FILE = "Login.txt"
 
-
-# Ensure the login file exists
+# Ensure login file exists
 if not os.path.exists(LOGIN_FILE):
     open(LOGIN_FILE, "w").close()
 
@@ -32,47 +30,58 @@ def save_user(username, password):
     with open(LOGIN_FILE, "a") as file:
         file.write(f"{username},{password}\n")
 
-# Login or signup interface
+# Helper for non-empty input
+def get_non_empty_input(prompt, is_password=False):
+    while True:
+        value = passwordbox(prompt) if is_password else enterbox(prompt)
+        if value:
+            return value
+        msgbox("Input cannot be empty. Please try again.")
+
+# Login or signup interface (improved version)
 def login_system():
     users = load_users()
+
     while True:
         action = buttonbox("Welcome to the Café App!\nDo you want to Log In or Sign Up?", "Login System", choices=["Log In", "Sign Up", "Exit"])
+
         if action == "Exit":
             msgbox("Exiting app. Goodbye!", "Exit")
             exit()
+
         elif action == "Sign Up":
             while True:
-                username = enterbox("Create a new username:")
-                if not username:
-                    break
+                username = get_non_empty_input("Create a new username:")
                 if username in users:
                     msgbox("That username already exists. Try a different one.")
                     continue
-                password = passwordbox("Create a password:")
-                confirm = passwordbox("Confirm your password:")
+
+                password = get_non_empty_input("Create a password:", is_password=True)
+                confirm = get_non_empty_input("Confirm your password:", is_password=True)
+
                 if password != confirm:
                     msgbox("Passwords do not match. Try again.")
-                else:
-                    save_user(username, password)
-                    # Update in-memory users dict immediately
-                    users[username] = password
-                    msgbox("Account created successfully!")
-                    break
+                    continue
+
+                save_user(username, password)
+                users[username] = password
+                msgbox("Account created successfully!")
+                break
+
         elif action == "Log In":
             for attempt in range(3):
-                username = enterbox("Enter your username:")
-                password = passwordbox("Enter your password:")
+                username = get_non_empty_input("Enter your username:")
+                password = get_non_empty_input("Enter your password:", is_password=True)
+
                 if users.get(username) == password:
                     msgbox(f"Welcome, {username}!")
-                    return  # Exit the login system
-                else:
-                    msgbox("Incorrect username or password.")
+                    return  # Exit on success
+
+                msgbox("Incorrect username or password.")
             msgbox("Too many failed attempts. Exiting.")
             exit()
 
-
-
-# Load menu items from file
+# Load menu items
 def load_menu():
     menu_items = {}
     with open(MENU_FILE, "r") as file:
@@ -81,17 +90,14 @@ def load_menu():
             if not row or row[0].startswith("#"):
                 continue
             number, name, price = row
-            menu_items[int(number)] = {
-                "name": name.strip(),
-                "price": float(price.strip())
-            }
+            menu_items[int(number)] = {"name": name.strip(), "price": float(price.strip())}
     return menu_items
 
-# Validate quantity
+# Quantity validation
 def is_valid_quantity(qty):
     return MIN_QUANTITY <= qty <= MAX_QUANTITY
 
-# Ask year level using EasyGUI and validate
+# Year level validation
 def get_year_level():
     while True:
         year_str = enterbox("Enter your year level: (9-13)")
@@ -109,7 +115,7 @@ def get_year_level():
         except ValueError:
             msgbox("Please enter a valid number.")
 
-# Display menu using a textbox
+# Display menu
 def display_menu(menu_items):
     menu_text = "Café Menu:\n"
     for number in sorted(menu_items):
@@ -117,7 +123,7 @@ def display_menu(menu_items):
         menu_text += f"{number}. {item['name']} - ${item['price']:.2f}\n"
     textbox("Menu", "Available Items", menu_text)
 
-# Take the order using buttonbox and enterbox
+# Take order
 def get_order(menu_items):
     cart = {}
     item_choices = [f"{num}. {item['name']}" for num, item in menu_items.items()]
@@ -157,7 +163,7 @@ def display_summary(cart, menu_items):
     summary += f"\nTotal Price: ${total:.2f}"
     textbox("Order Summary", "Your Order", summary)
 
-# Program flow
+# Run the program
 def main():
     login_system()
     get_year_level()
