@@ -54,6 +54,8 @@ def login_system():
                     msgbox("Passwords do not match. Try again.")
                 else:
                     save_user(username, password)
+                    # Update in-memory users dict immediately
+                    users[username] = password
                     msgbox("Account created successfully!")
                     break
         elif action == "Log In":
@@ -67,6 +69,7 @@ def login_system():
                     msgbox("Incorrect username or password.")
             msgbox("Too many failed attempts. Exiting.")
             exit()
+
 
 
 # Load menu items from file
