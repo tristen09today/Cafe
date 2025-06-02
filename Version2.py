@@ -1,6 +1,6 @@
 # Version 2 of the app should be more complex involving Easy GUI 
 # Year eligibility for the app is 9-13
-
+from easygui import *
 # Constants
 YEAR_ELIGIBILITY = [9, 10, 11, 12, 13]
 MAX_QUANTITY = 50  # Maximum allowed quantity per item
