@@ -8,6 +8,7 @@ import csv
 YEAR_ELIGIBILITY = [9, 10, 11, 12, 13]
 MAX_QUANTITY = 50
 MIN_QUANTITY = 1
+LOGIN_ATTEMPS = 3
 MENU_FILE  = "menu.txt"
 LOGIN_FILE = "Login.txt"
 
@@ -32,11 +33,13 @@ def save_user(username, password):
 
 # Helper for non-empty input
 def get_non_empty_input(prompt, is_password=False):
-    while True:
-        value = passwordbox(prompt) if is_password else enterbox(prompt)
-        if value:
-            return value
+    value = passwordbox(prompt) if is_password else enterbox(prompt)
+    if value is None:  # Cancel or close
+        return None
+    if not value.strip():
         msgbox("Input cannot be empty. Please try again.")
+        return get_non_empty_input(prompt, is_password)
+    return value
 
 # Login or signup interface (improved version)
 def login_system():
@@ -45,19 +48,25 @@ def login_system():
     while True:
         action = buttonbox("Welcome to the Café App!\nDo you want to Log In or Sign Up?", "Login System", choices=["Log In", "Sign Up", "Exit"])
 
-        if action == "Exit":
+        if action == "Exit" or action is None:
             msgbox("Exiting app. Goodbye!", "Exit")
             exit()
 
         elif action == "Sign Up":
             while True:
                 username = get_non_empty_input("Create a new username:")
+                if username is None:
+                    break  # Return to main menu
                 if username in users:
                     msgbox("That username already exists. Try a different one.")
                     continue
 
                 password = get_non_empty_input("Create a password:", is_password=True)
+                if password is None:
+                    break
                 confirm = get_non_empty_input("Confirm your password:", is_password=True)
+                if confirm is None:
+                    break
 
                 if password != confirm:
                     msgbox("Passwords do not match. Try again.")
@@ -69,17 +78,24 @@ def login_system():
                 break
 
         elif action == "Log In":
-            for attempt in range(3):
-                username = get_non_empty_input("Enter your username:")
-                password = get_non_empty_input("Enter your password:", is_password=True)
+                
+                for attempt in range(LOGIN_ATTEMPS):
+                    username = get_non_empty_input("Enter your username:")
+                    if username is None:
+                        break  # Back to main menu
+                    password = get_non_empty_input("Enter your password:", is_password=True)
+                    if password is None:
+                        break
 
-                if users.get(username) == password:
-                    msgbox(f"Welcome, {username}!")
-                    return  # Exit on success
+                    if users.get(username) == password:
+                        msgbox(f"Welcome, {username}!")
+                        return  # Successful login
 
-                msgbox("Incorrect username or password.")
-            msgbox("Too many failed attempts. Exiting.")
-            exit()
+                    msgbox("Incorrect username or password.")
+                else:
+                    msgbox("Too many failed attempts. Exiting.")
+                    exit()
+
 
 # Load menu items
 def load_menu():
