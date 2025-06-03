@@ -5,3 +5,4 @@ tris1,None
 f,
 tristen5,
 tr,12
+teodor,iordan

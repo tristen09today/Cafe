@@ -17,11 +17,7 @@ MAX_PASS_LENGTH = 15
 MIN_USER_LENGTH = 3
 MAX_USER_LENGTH = 15
 
-# Ensure login file exists
-if not os.path.exists(LOGIN_FILE):
-    open(LOGIN_FILE, "w").close()
-
-# Load users from file
+# Load users from file and format them into a dictionary
 def load_users():
     users = {}
     with open(LOGIN_FILE, "r") as file:
