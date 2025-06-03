@@ -1,7 +1,5 @@
 # Version 2 of the app should be more complex involving Easy GUI 
-# Year eligibility for the app is 9-13
 from easygui import *
-import os
 import csv
 
 # Constants
@@ -23,7 +21,7 @@ def load_users():
     with open(LOGIN_FILE, "r") as file:
         for line in file:
             if line.strip():
-                username, password = line.strip().split(",")
+                username, password = line.strip().split(",") #This formats the file into a dictionary
                 users[username] = password
     return users
 
@@ -32,55 +30,58 @@ def save_user(username, password):
     with open(LOGIN_FILE, "a") as file:
         file.write(f"{username},{password}\n")
 
-# Validate string length
-def is_valid_length(value, min_len, max_len, field_name):
+# Validate string length and checks wether user's password is between the min and max length
+def valid_length(value, min_len, max_len, field_name):
     if len(value) < min_len or len(value) > max_len:
         msgbox(f"{field_name} must be between {min_len} and {max_len} characters.")
         return False
     return True
 
 # Helper for non-empty input
-def get_non_empty_input(prompt, is_password=False):
+#The get_input function prompts the user for input and handles empty or cancel inputs.
+def get_input(prompt, is_password=False):
     value = passwordbox(prompt) if is_password else enterbox(prompt)
     if value is None:  # Cancel or close
         return None
     if not value.strip():
         msgbox("Input cannot be empty. Please try again.")
-        return get_non_empty_input(prompt, is_password)
+        return get_input(prompt, is_password)
     return value
 
 # Login or signup interface (improved version)
 def login_system():
     users = load_users()
-
+    # Main loop for login or signup
     while True:
         action = buttonbox("Welcome to the Café App!\nDo you want to Log In or Sign Up?", "Login System", choices=["Log In", "Sign Up", "Exit"])
-
+        # Handle user actions
         if action == "Exit" or action is None:
             msgbox("Exiting app. Goodbye!", "Exit")
             exit()
-
+        #if users choose to sign up  
         elif action == "Sign Up":
             while True:
-                username = get_non_empty_input("Create a new username:")
+                username = get_input("Create a new username:")
                 if username is None:
-                    break  # Return to main menu
-                if username in users:
-                    msgbox("That username already exists. Try a different one.")
-                    continue
-                if not is_valid_length(username, MIN_USER_LENGTH, MAX_USER_LENGTH, "Username"):
-                    continue
+                    break  #return back to main menu (press cancel)
 
-                password = get_non_empty_input("Create a password:", is_password=True)
+                #if user is in the dictionary then it will prompt the user to try again
+                if username in users:
+                    msgbox("That username already exists. Try a different one.") #
+                    continue
+                if not valid_length(username, MIN_USER_LENGTH, MAX_USER_LENGTH, "Username"):
+                    continue
+                password = get_input("Create a password:", is_password=True)
                 if password is None:
                     break
-                if not is_valid_length(password, MIN_PASS_LENGTH, MAX_PASS_LENGTH, "Password"):
+                if not valid_length(password, MIN_PASS_LENGTH, MAX_PASS_LENGTH, "Password"):
                     continue
 
-                confirm = get_non_empty_input("Confirm your password:", is_password=True)
+                #else it will save the user
+                confirm = get_input("Confirm your password:", is_password=True)
                 if confirm is None:
                     break
-
+                # Check if passwords match
                 if password != confirm:
                     msgbox("Passwords do not match. Try again.")
                     continue
@@ -92,10 +93,10 @@ def login_system():
 
         elif action == "Log In":
             for attempt in range(LOGIN_ATTEMPS):
-                username = get_non_empty_input("Enter your username:")
+                username = get_input("Enter your username:")
                 if username is None:
                     break  # Back to main menu
-                password = get_non_empty_input("Enter your password:", is_password=True)
+                password = get_input("Enter your password:", is_password=True)
                 if password is None:
                     break
 
