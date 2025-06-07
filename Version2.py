@@ -134,7 +134,7 @@ def is_valid_quantity(qty):
 # Year level validation
 def get_year_level():
     while True:
-        year_str = enterbox("Enter your year level: (9-13)")
+        year_str = enterbox("Enter your year level: ")
         if year_str is None:
             msgbox("Exiting app.")
             exit()
@@ -157,30 +157,33 @@ def display_menu(menu_items):
         menu_text += f"{number}. {item['name']} - ${item['price']:.2f}\n"
     textbox("Menu", "Available Items", menu_text)
 
-# Take order
 def get_order(menu_items):
     cart = {}
     item_choices = [f"{num}. {item['name']}" for num, item in menu_items.items()]
     item_choices.append("Finish Order")
 
     while True:
-        choice_str = buttonbox("Select an item to order:", "Make Your Order", item_choices)
-        if choice_str == "Finish Order":
+        choice_str = choicebox("Select an item to order:", "Make Your Order", item_choices)
+        if choice_str == "Finish Order" or choice_str is None:
             break
         item_number = int(choice_str.split(".")[0])
-        qty_str = enterbox(f"Enter quantity for {menu_items[item_number]['name']} (1-50):")
+        current_qty = cart.get(item_number, 0)
+
+        qty_str = enterbox(f"You currently have {current_qty} of {menu_items[item_number]['name']}.\nEnter quantity to add (1–{MAX_QUANTITY - current_qty}):")
         if qty_str is None:
             continue
         try:
             qty = int(qty_str)
-            if is_valid_quantity(qty):
-                cart[item_number] = cart.get(item_number, 0) + qty
-                msgbox(f"Added {qty} of {menu_items[item_number]['name']} to your order.")
-            else:
-                msgbox(f"Quantity must be between {MIN_QUANTITY} and {MAX_QUANTITY}.")
+            new_total = current_qty + qty
+            if not is_valid_quantity(new_total):
+                msgbox(f"You can only order a total of {MAX_QUANTITY} for {menu_items[item_number]['name']}.")
+                continue
+            cart[item_number] = new_total
+            msgbox(f"Added {qty} of {menu_items[item_number]['name']} to your order. Total: {new_total}")
         except ValueError:
             msgbox("Please enter a valid number.")
     return cart
+
 
 # Display order summary
 def display_summary(cart, menu_items):
