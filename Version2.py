@@ -127,9 +127,7 @@ def load_menu():
             menu_items[int(number)] = {"name": name.strip(), "price": float(price.strip())}
     return menu_items
 
-# Quantity validation
-def is_valid_quantity(qty):
-    return MIN_QUANTITY <= qty <= MAX_QUANTITY
+
 
 # Year level validation
 def get_year_level():
@@ -157,25 +155,35 @@ def display_menu(menu_items):
         menu_text += f"{number}. {item['name']} - ${item['price']:.2f}\n"
     textbox("Menu", "Available Items", menu_text)
 
+# Quantity validation
+def valid_quantity(qty):
+    return MIN_QUANTITY <= qty <= MAX_QUANTITY
+
+# Function to get the user's order
 def get_order(menu_items):
     cart = {}
+    # Creates a list of item choices for the user to select from
     item_choices = [f"{num}. {item['name']}" for num, item in menu_items.items()]
+    #adds all the items to the list for summary
     item_choices.append("Finish Order")
 
     while True:
+        #Prompts the users to select an item to order
         choice_str = choicebox("Select an item to order:", "Make Your Order", item_choices)
+        #If the user selects "Finish Order" or cancels, it breaks the loop
         if choice_str == "Finish Order" or choice_str is None:
             break
         item_number = int(choice_str.split(".")[0])
         current_qty = cart.get(item_number, 0)
-
-        qty_str = enterbox(f"You currently have {current_qty} of {menu_items[item_number]['name']}.\nEnter quantity to add (1–{MAX_QUANTITY - current_qty}):")
+        #tells the user how many they currently have and how many they can add
+        qty_str = enterbox(f"You currently have {current_qty} of {menu_items[item_number]['name']}.\nEnter quantity to add ({MAX_QUANTITY - current_qty} left):")
         if qty_str is None:
             continue
         try:
             qty = int(qty_str)
             new_total = current_qty + qty
-            if not is_valid_quantity(new_total):
+            #check if the new total exceeds the maximum allowed quantity
+            if not valid_quantity(new_total):
                 msgbox(f"You can only order a total of {MAX_QUANTITY} for {menu_items[item_number]['name']}.")
                 continue
             cart[item_number] = new_total
