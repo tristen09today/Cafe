@@ -9,7 +9,7 @@ MIN_QUANTITY = 1
 MENU_FILE  = "menu.txt"
 # Login system constants
 LOGIN_FILE = "Login.txt"
-LOGIN_ATTEMPS = 3
+LOGIN_ATTEMPS = 3   
 MIN_PASS_LENGTH = 4
 MAX_PASS_LENGTH = 15
 MIN_USER_LENGTH = 3
@@ -30,15 +30,7 @@ def save_user(username, password):
     with open(LOGIN_FILE, "a") as file:
         file.write(f"{username},{password}\n")
 
-# Validate string length and checks wether user's password is between the min and max length
-def valid_length(value, min_len, max_len, field_name):
-    if len(value) < min_len or len(value) > max_len:
-        msgbox(f"{field_name} must be between {min_len} and {max_len} characters.")
-        return False
-    return True
-
 # Helper for non-empty input
-#The get_input function prompts the user for input and handles empty or cancel inputs.
 def get_input(prompt, is_password=False):
     value = passwordbox(prompt) if is_password else enterbox(prompt)
     if value is None:  # Cancel or close
@@ -48,62 +40,76 @@ def get_input(prompt, is_password=False):
         return get_input(prompt, is_password)
     return value
 
+# Validate string length of the passsword or username, ensuring it meets the specified criteria
+def valid_length(value, min_len, max_len, field_name):
+    if len(value) < min_len or len(value) > max_len:
+        msgbox(f"{field_name} must be between {min_len} and {max_len} characters.")
+        return False
+    return True
+
+# New helper function for validation and duplicate check
+def user_check(prompt, min_len, max_len, field_name, is_password=False, users=None):
+    while True:
+        value = get_input(prompt, is_password)
+        if value is None:
+            return None
+        if users and value in users:
+            msgbox(f"{field_name} already exists. Please choose another.")
+            continue
+        if not valid_length(value, min_len, max_len, field_name):
+            continue
+        return value
+
+# Register a new user with validation
+def register_user(users):
+    # Prompt the user to enter a valid username (checks length and if already taken)
+    username = user_check("Create a new username:", MIN_USER_LENGTH, MAX_USER_LENGTH, "Username", users=users)
+    if username is None: 
+        return False  
+
+    # Prompt the user to create a valid password (checks length)
+    password = user_check("Create a password:", MIN_PASS_LENGTH, MAX_PASS_LENGTH, "Password", is_password=True)
+    if password is None:
+        return False  
+
+    # Ask the user to confirm their password
+    confirm = get_input("Confirm your password:", is_password=True)
+    if confirm is None:
+        return False  
+
+    # Check if the two passwords match
+    if password != confirm:
+        msgbox("Passwords do not match. Please try again.")
+        return register_user(users)  # Recursively restart the registration process
+
+    # Save the new user's credentials to the file and update the users dictionary
+    save_user(username, password)
+    users[username] = password
+    return True  # Registration successful
+
+
 # Login or signup interface (improved version)
 def login_system():
     users = load_users()
-    # Main loop for login or signup
     while True:
         action = buttonbox("Welcome to the Café App!\nDo you want to Log In or Sign Up?", "Login System", choices=["Log In", "Sign Up", "Exit"])
-        # Handle user actions
         if action == "Exit" or action is None:
             msgbox("Exiting app. Goodbye!", "Exit")
             exit()
-        #if users choose to sign up  
         elif action == "Sign Up":
-            while True:
-                username = get_input("Create a new username:")
-                if username is None:
-                    break  #return back to main menu (press cancel)
-
-                #if user is in the dictionary then it will prompt the user to try again
-                if username in users:
-                    msgbox("That username already exists. Try a different one.") #
-                    continue
-                if not valid_length(username, MIN_USER_LENGTH, MAX_USER_LENGTH, "Username"):
-                    continue
-                password = get_input("Create a password:", is_password=True)
-                if password is None:
-                    break
-                if not valid_length(password, MIN_PASS_LENGTH, MAX_PASS_LENGTH, "Password"):
-                    continue
-
-                #else it will save the user
-                confirm = get_input("Confirm your password:", is_password=True)
-                if confirm is None:
-                    break
-                # Check if passwords match
-                if password != confirm:
-                    msgbox("Passwords do not match. Try again.")
-                    continue
-
-                save_user(username, password)
-                users[username] = password
+            if register_user(users):
                 msgbox("Account created successfully!")
-                break
-
         elif action == "Log In":
             for attempt in range(LOGIN_ATTEMPS):
-                username = get_input("Enter your username:")
+                username = get_input("Enter your username:")    
                 if username is None:
                     break  # Back to main menu
                 password = get_input("Enter your password:", is_password=True)
                 if password is None:
                     break
-
                 if users.get(username) == password:
                     msgbox(f"Welcome, {username}!")
                     return  # Successful login
-
                 msgbox("Incorrect username or password.")
             else:
                 msgbox("Too many failed attempts. Exiting.")
