@@ -90,24 +90,30 @@ def register_user(users):
 
 # Login or signup interface (improved version)
 def login_system():
-    users = load_users()
+    
+    users = load_users() # Load existing users from file
     while True:
-        action = buttonbox("Welcome to the Café App!\nDo you want to Log In or Sign Up?", "Login System", choices=["Log In", "Sign Up", "Exit"])
+        # Display the welcome message and ask the user to log in or sign up
+        action = buttonbox("Welcome to the Café App!\nDo you want to Log In or Sign Up?", "Login System", choices=["Log In", "Sign Up", "Exit"]) 
         if action == "Exit" or action is None:
             msgbox("Exiting app. Goodbye!", "Exit")
             exit()
+        # If the user chooses to sign up, call the register_user function
         elif action == "Sign Up":
             if register_user(users):
                 msgbox("Account created successfully!")
+        # If the user chooses to log in, prompt for username and password
         elif action == "Log In":
-            for attempt in range(LOGIN_ATTEMPS):
+            for attempt in range(LOGIN_ATTEMPS): # Allow up to 3 login attempts
                 username = get_input("Enter your username:")    
-                if username is None:
-                    break  # Back to main menu
-                password = get_input("Enter your password:", is_password=True)
+                if username is None: #User cancelled or closed the dialog return to the main menu
+                    break  
+                #
+                password = get_input("Enter your password:", is_password=True) 
                 if password is None:
                     break
-                if users.get(username) == password:
+                # Check if the username and password match and if they do, welcome the user
+                if users.get(username) == password: 
                     msgbox(f"Welcome, {username}!")
                     return  # Successful login
                 msgbox("Incorrect username or password.")
@@ -115,7 +121,7 @@ def login_system():
                 msgbox("Too many failed attempts. Exiting.")
                 exit()
 
-# Load menu items
+# Load menu items into a dictionary from the menu file
 def load_menu():
     menu_items = {}
     with open(MENU_FILE, "r") as file:
@@ -200,6 +206,7 @@ def display_summary(cart, menu_items):
         return
     summary = "Order Summary:\n"
     total = 0
+    # Iterates through the cart and calculates the total cost for each item
     for number, quantity in cart.items():
         item = menu_items[number]
         cost = item["price"] * quantity
