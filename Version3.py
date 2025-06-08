@@ -36,16 +36,16 @@ def valid_length(value, min_len, max_len, field_name):
         return False
     return True
 
-# Register a new user using multenterbox
 def register_user(users):
-    fields = ["New Username", "New Password", "Confirm Password", "Year Level (9–13)"]
+    fields = ["New Username", "New Password", "Confirm Password", "Year Level "]
     title = "Sign Up"
     msg = "Enter your new account details:"
-    
+    values = [""] * len(fields)  # Start with empty values
+
     while True:
-        values = multenterbox(msg, title, fields)
+        values = multenterbox(msg, title, fields, values)  # Reuse previous input
         if values is None:
-            return False  # User cancelled
+            return False  # User cancelled  
 
         username, password, confirm, year_str = values
         errmsg = ""
