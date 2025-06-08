@@ -5,16 +5,14 @@ import csv
 YEAR_ELIGIBILITY = [9, 10, 11, 12, 13]
 MAX_QUANTITY = 50
 MIN_QUANTITY = 1
-MENU_FILE  = "menu.txt"
-# Login system constants
+MENU_FILE = "menu.txt"
 LOGIN_FILE = "Login.txt"
-LOGIN_ATTEMPS = 3   
+LOGIN_ATTEMPS = 3
 MIN_PASS_LENGTH = 4
 MAX_PASS_LENGTH = 15
 MIN_USER_LENGTH = 3
 MAX_USER_LENGTH = 15
 
-# Load users from file and format them into a dictionary
 def load_users():
     users = {}
     with open(LOGIN_FILE, "r") as file:
@@ -24,17 +22,12 @@ def load_users():
                 users[username] = password
     return users
 
-# Save new user to file
 def save_user(username, password):
     with open(LOGIN_FILE, "a") as file:
         file.write(f"{username},{password}\n")
 
-# Validate length
 def valid_length(value, min_len, max_len, field_name):
-    if len(value) < min_len or len(value) > max_len:
-        msgbox(f"{field_name} must be between {min_len} and {max_len} characters.")
-        return False
-    return True
+    return min_len <= len(value) <= max_len
 
 def register_user(users):
     fields = ["New Username", "New Password", "Confirm Password", "Year Level "]
@@ -56,37 +49,34 @@ def register_user(users):
                 errmsg += f'"{fields[i]}" is a required field.\n\n'
 
         # Username checks
-        if errmsg == "" and username in users:
+        if username in users:
             errmsg += "Username already exists.\n\n"
-        if errmsg == "" and not valid_length(username, MIN_USER_LENGTH, MAX_USER_LENGTH, "Username"):
+        if not valid_length(username, MIN_USER_LENGTH, MAX_USER_LENGTH, "Username"):
             errmsg += f"Username must be {MIN_USER_LENGTH}-{MAX_USER_LENGTH} characters.\n\n"
 
         # Password checks
-        if errmsg == "" and not valid_length(password, MIN_PASS_LENGTH, MAX_PASS_LENGTH, "Password"):
+        if not valid_length(password, MIN_PASS_LENGTH, MAX_PASS_LENGTH, "Password"):
             errmsg += f"Password must be {MIN_PASS_LENGTH}-{MAX_PASS_LENGTH} characters.\n\n"
-        if errmsg == "" and password != confirm:
+        if password != confirm:
             errmsg += "Passwords do not match.\n\n"
 
         # Year level check
-        if errmsg == "":
-            if year_str.isdigit():
-                year = int(year_str)
-                if year not in YEAR_ELIGIBILITY:
-                    errmsg += "Only students in Years 9–13 are eligible.\n\n"
-            else:
-                errmsg += "Year level must be a number.\n\n"
+        if not year_str.isdigit():
+            errmsg += "Year level must be a number.\n\n"
+        else:
+            year = int(year_str)
+            if year not in YEAR_ELIGIBILITY:
+                errmsg += "Only students in Years 9–13 are eligible.\n\n"
 
         if errmsg:
             msg = errmsg + "Please correct the following:"
             continue
 
-        # Passed all checks — save
         save_user(username, password)
         users[username] = password
         msgbox("Account created successfully!")
         return True
 
-# Login or Sign Up
 def login_system():
     users = load_users()
     while True:
@@ -115,7 +105,6 @@ def login_system():
                 msgbox("Too many failed attempts. Exiting.")
                 exit()
 
-# Load menu
 def load_menu():
     menu_items = {}
     with open(MENU_FILE, "r") as file:
@@ -127,7 +116,6 @@ def load_menu():
             menu_items[int(number)] = {"name": name.strip(), "price": float(price.strip())}
     return menu_items
 
-# Show menu
 def display_menu(menu_items):
     menu_text = "Café Menu:\n"
     for number in sorted(menu_items):
@@ -135,11 +123,9 @@ def display_menu(menu_items):
         menu_text += f"{number}. {item['name']} - ${item['price']:.2f}\n"
     textbox("Menu", "Available Items", menu_text)
 
-# Check quantity
 def valid_quantity(qty):
     return MIN_QUANTITY <= qty <= MAX_QUANTITY
 
-# Take order
 def get_order(menu_items):
     cart = {}
     item_choices = [f"{num}. {item['name']}" for num, item in menu_items.items()]
@@ -166,7 +152,6 @@ def get_order(menu_items):
             msgbox("Please enter a valid number.")
     return cart
 
-# Order summary
 def display_summary(cart, menu_items):
     if not cart:
         msgbox("You have not ordered anything.")
@@ -181,7 +166,6 @@ def display_summary(cart, menu_items):
     summary += f"\nTotal Price: ${total:.2f}"
     textbox("Order Summary", "Your Order", summary)
 
-# Run app
 def main():
     login_system()
     menu_items = load_menu()
