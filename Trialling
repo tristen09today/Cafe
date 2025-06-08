@@ -1,0 +1,61 @@
+def login_system():
+    users = load_users()  # Load existing users from file
+    while True:
+        action = buttonbox("Welcome to the Café App!\nDo you want to Log In or Sign Up?", "Login System", choices=["Log In", "Sign Up", "Exit"]) 
+        if action == "Exit" or action is None:
+            msgbox("Exiting app. Goodbye!", "Exit")
+            exit()
+        elif action == "Sign Up":
+            # Use multenterbox to get username, password, confirm password, and year level
+            fields = ["New Username", "New Password", "Confirm Password", "Year Level (9–13)"]
+            while True:
+                values = multenterbox("Enter your new account details:", "Sign Up", fields)
+                if values is None:
+                    break
+                username, password, confirm, year_str = values
+
+                if not username.strip() or not password.strip() or not confirm.strip() or not year_str.strip():
+                    msgbox("All fields must be filled.")
+                    continue
+                if username in users:
+                    msgbox("Username already exists. Please choose another.")
+                    continue
+                if not valid_length(username, MIN_USER_LENGTH, MAX_USER_LENGTH, "Username"):
+                    continue
+                if not valid_length(password, MIN_PASS_LENGTH, MAX_PASS_LENGTH, "Password"):
+                    continue
+                if password != confirm:
+                    msgbox("Passwords do not match.")
+                    continue
+                try:
+                    year = int(year_str)
+                    if year not in YEAR_ELIGIBILITY:
+                        msgbox("Only students in Years 9–13 are eligible to use this app.")
+                        continue
+                except ValueError:
+                    msgbox("Please enter a valid number for Year Level.")
+                    continue
+
+                save_user(username, password)
+                users[username] = password
+                msgbox("Account created successfully!")
+                break
+
+        elif action == "Log In":
+            for attempt in range(LOGIN_ATTEMPS):
+                fields = ["Username", "Password"]
+                values = multenterbox("Enter your login details:", "Log In", fields)
+                if values is None:
+                    break
+                username, password = values
+                if not username.strip() or not password.strip():
+                    msgbox("Both fields are required.")
+                    continue
+                if users.get(username) == password:
+                    msgbox(f"Welcome, {username}!")
+                    return
+                else:
+                    msgbox("Incorrect username or password.")
+            else:
+                msgbox("Too many failed attempts. Exiting.")
+                exit()
