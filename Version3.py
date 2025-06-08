@@ -1,7 +1,7 @@
 from easygui import *
-import csv
 import tkinter as tk
 from tkinter import ttk
+import csv
 
 # Constants
 YEAR_ELIGIBILITY = [9, 10, 11, 12, 13]
@@ -124,80 +124,75 @@ def display_menu(menu_items):
 def valid_quantity(qty):
     return MIN_QUANTITY <= qty <= MAX_QUANTITY
 
-def open_cart_manager(cart, menu_items):
-    def update_summary():
-        summary_text.set("")
-        for number in sorted(cart):
-            qty = cart[number]
-            if qty > 0:
-                item = menu_items[number]
-                summary_text.set(summary_text.get() + f"{item['name']} x{qty}\n")
-
-    def add_item(num):
-        if cart.get(num, 0) < MAX_QUANTITY:
-            cart[num] = cart.get(num, 0) + 1
-            update_summary()
-
-    def remove_item(num):
-        if cart.get(num, 0) > 0:
-            cart[num] -= 1
-            update_summary()
-
-    def finish():
-        root.destroy()
-
-    root = tk.Tk()
-    root.title("Cart Manager")
-    root.geometry("450x600")
-
-    ttk.Label(root, text="Edit Your Cart", font=("Arial", 14)).pack(pady=10)
-
-    for number in sorted(menu_items):
-        item = menu_items[number]
-        row = ttk.Frame(root)
-        row.pack(fill="x", padx=10, pady=2)
-        ttk.Label(row, text=f"{item['name']} (${item['price']:.2f})", width=28, anchor="w").pack(side="left")
-        ttk.Button(row, text="+", command=lambda n=number: add_item(n)).pack(side="left", padx=2)
-        ttk.Button(row, text="-", command=lambda n=number: remove_item(n)).pack(side="left", padx=2)
-
-    summary_text = tk.StringVar()
-    ttk.Label(root, text="Cart Summary:", font=("Arial", 12)).pack(pady=10)
-    ttk.Label(root, textvariable=summary_text, justify="left").pack(pady=5)
-
-    ttk.Button(root, text="Done", command=finish).pack(pady=15)
-
-    update_summary()
-    root.mainloop()
-
 def get_order(menu_items):
     cart = {}
-    item_choices = [f"{num}. {item['name']}" for num, item in menu_items.items()]
-    item_choices.append("🛒 View/Edit Cart")
-    item_choices.append("✅ Finish Order")
+
+    def open_cart_manager(cart, menu_items):
+        def update_summary():
+            summary_text.set("")
+            for number in sorted(cart):
+                qty = cart[number]
+                if qty > 0:
+                    item = menu_items[number]
+                    summary_text.set(summary_text.get() + f"{item['name']} x{qty}\n")
+
+        def add_item(num):
+            if cart.get(num, 0) < MAX_QUANTITY:
+                cart[num] = cart.get(num, 0) + 1
+                update_summary()
+
+        def remove_item(num):
+            if cart.get(num, 0) > 0:
+                cart[num] -= 1
+                update_summary()
+
+        def finish():
+            root.destroy()
+
+        root = tk.Tk()
+        root.title("Cart Manager")
+        root.geometry("450x600")
+
+        ttk.Label(root, text="Edit Your Cart", font=("Arial", 14)).pack(pady=10)
+
+        for number in sorted(menu_items):
+            item = menu_items[number]
+            row = ttk.Frame(root)
+            row.pack(fill="x", padx=10, pady=2)
+            ttk.Label(row, text=f"{item['name']} (${item['price']:.2f})", width=28, anchor="w").pack(side="left")
+            ttk.Button(row, text="+", command=lambda n=number: add_item(n)).pack(side="left", padx=2)
+            ttk.Button(row, text="-", command=lambda n=number: remove_item(n)).pack(side="left", padx=2)
+
+        summary_text = tk.StringVar()
+        ttk.Label(root, text="Cart Summary:", font=("Arial", 12)).pack(pady=10)
+        ttk.Label(root, textvariable=summary_text, justify="left").pack(pady=5)
+
+        ttk.Button(root, text="Done", command=finish).pack(pady=15)
+
+        update_summary()
+        root.mainloop()
+
+    def show_order_history():
+        if not cart:
+            msgbox("No order history yet.")
+            return
+        history = "Your Current Order:\n"
+        for number in cart:
+            item = menu_items[number]
+            qty = cart[number]
+            if qty > 0:
+                history += f"{item['name']} x{qty}\n"
+        textbox("Order History", "Previously Ordered Items", history)
 
     while True:
-        choice_str = choicebox("Select an item to order:", "Make Your Order", item_choices)
-        if choice_str is None or choice_str == "✅ Finish Order":
+        action = buttonbox("Choose an option:", "Order Menu", choices=["\U0001F6D2 Order", "\U0001F4DC Order History", "✅ Finish"])
+        if action is None or action == "✅ Finish":
             break
-        elif choice_str == "🛒 View/Edit Cart":
+        elif action == "\U0001F6D2 Order":
             open_cart_manager(cart, menu_items)
-            continue
-        else:
-            item_number = int(choice_str.split(".")[0])
-            current_qty = cart.get(item_number, 0)
-            qty_str = enterbox(f"You currently have {current_qty} of {menu_items[item_number]['name']}.\nEnter quantity to add ({MAX_QUANTITY - current_qty} left):")
-            if qty_str is None:
-                continue
-            try:
-                qty = int(qty_str)
-                new_total = current_qty + qty
-                if not valid_quantity(new_total):
-                    msgbox(f"You can only order a total of {MAX_QUANTITY} for {menu_items[item_number]['name']}.")
-                    continue
-                cart[item_number] = new_total
-                msgbox(f"Added {qty} of {menu_items[item_number]['name']} to your order. Total: {new_total}")
-            except ValueError:
-                msgbox("Please enter a valid number.")
+        elif action == "\U0001F4DC Order History":
+            show_order_history()
+
     return cart
 
 def display_summary(cart, menu_items):
