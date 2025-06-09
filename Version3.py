@@ -115,11 +115,20 @@ def load_menu():
     return menu_items
 
 def display_menu(menu_items):
-    menu_text = "Café Menu:\n"
+    root = tk.Tk()
+    root.title("Café Menu for Students")
+    root.geometry("550x400")
+
+    tk.Label(root, text="Café Menu", font=("Arial", 16)).pack(pady=10)
+
     for number in sorted(menu_items):
         item = menu_items[number]
-        menu_text += f"{number}. {item['name']} - ${item['price']:.2f}\n"
-    textbox("Menu", "Available Items", menu_text)
+        label = f"{number}. {item['name']} - ${item['price']:.2f}"
+        tk.Label(root, text=label, font=("Arial", 12), anchor="w").pack(fill="x", padx=20, pady=2)
+
+    tk.Button(root, text="Close", command=root.destroy).pack(pady=15)
+
+    root.mainloop()
 
 def valid_quantity(qty):
     return MIN_QUANTITY <= qty <= MAX_QUANTITY
@@ -217,3 +226,7 @@ def main():
     display_summary(cart, menu_items)
 
 main()
+    
+
+
+
