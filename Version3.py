@@ -154,41 +154,45 @@ def display_menu(menu_items):
     tk.Button(root, text="Close", command=root.destroy).pack(pady=15)
 
     root.mainloop()
-#checks 
+# checks if the quantity is valid, ensuring it is within the lower and upper limits
 def valid_quantity(qty):
     return MIN_QUANTITY <= qty <= MAX_QUANTITY
 
+# this function manages the cart, allowing users to add, remove, and view items in their order
 def get_order(menu_items):
     cart = {}
-
+    # from the menu items, initialize the cart with each item set to 0
     def open_cart_manager(cart, menu_items):
         def update_summary():
             summary_text.set("")
             for number in sorted(cart):
-                qty = cart[number]
-                if qty > 0:
+                qty = cart[number] # Get the quantity of each item in the cart
+                if qty > 0: # If the quantity is greater than 0, add it to the summary
                     item = menu_items[number]
                     summary_text.set(summary_text.get() + f"{item['name']} x{qty}\n")
 
+        #This function adds an item to the cart, increasing its quantity by 1 if it is valid
         def add_item(num):
-            if cart.get(num, 0) < MAX_QUANTITY:
-                cart[num] = cart.get(num, 0) + 1
+            new_qty = cart.get(num, 0) + 1
+            if valid_quantity(new_qty):
+                cart[num] = new_qty
                 update_summary()
-
+        #This function removes item from cart if it exists, decreasing its quantity by 1
         def remove_item(num):
             if cart.get(num, 0) > 0:
                 cart[num] -= 1
                 update_summary()
-
+        # This function closes the cart manager window
         def finish():
             root.destroy()
-
+        # Create the main window for the cart manager
         root = tk.Tk()
         root.title("Cart Manager")
         root.geometry("450x600")
 
+        # Create a label for the cart manager title
         ttk.Label(root, text="Edit Your Cart", font=("Arial", 14)).pack(pady=10)
-
+        # Create a frame for the menu items
         for number in sorted(menu_items):
             item = menu_items[number]
             row = ttk.Frame(root)
@@ -196,7 +200,7 @@ def get_order(menu_items):
             ttk.Label(row, text=f"{item['name']} (${item['price']:.2f})", width=28, anchor="w").pack(side="left")
             ttk.Button(row, text="+", command=lambda n=number: add_item(n)).pack(side="left", padx=2)
             ttk.Button(row, text="-", command=lambda n=number: remove_item(n)).pack(side="left", padx=2)
-
+        # Create a label for the cart summary
         summary_text = tk.StringVar()
         ttk.Label(root, text="Cart Summary:", font=("Arial", 12)).pack(pady=10)
         ttk.Label(root, textvariable=summary_text, justify="left").pack(pady=5)
