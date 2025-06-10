@@ -1,3 +1,5 @@
+'''For version 3 of the café app, we will implement a login system, a menu display,
+ and an order management system. '''
 from easygui import *
 import tkinter as tk
 from tkinter import ttk
@@ -7,6 +9,7 @@ import csv
 YEAR_ELIGIBILITY = [9, 10, 11, 12, 13]
 MAX_QUANTITY = 50
 MIN_QUANTITY = 1
+#constants for login and registration
 MENU_FILE = "menu.txt"
 LOGIN_FILE = "Login.txt"
 LOGIN_ATTEMPS = 3
@@ -15,40 +18,49 @@ MAX_PASS_LENGTH = 15
 MIN_USER_LENGTH = 3
 MAX_USER_LENGTH = 15
 
+# Load users from file and format them into a dictionary
 def load_users():
     users = {}
     with open(LOGIN_FILE, "r") as file:
         for line in file:
             if line.strip():
-                username, password = line.strip().split(",")
+                username, password = line.strip().split(",") # This formats the file into a dictionary
                 users[username] = password
     return users
 
+# Save new user to file
 def save_user(username, password):
     with open(LOGIN_FILE, "a") as file:
         file.write(f"{username},{password}\n")
 
+#checks if string length of the password or username, ensuring it meets the specified criteria
 def valid_length(value, min_len, max_len, field_name):
     return min_len <= len(value) <= max_len
 
+#The function register's a new user by collecting their details through a multienterbox.
 def register_user(users):
     fields = ["New Username", "New Password", "Confirm Password", "Year Level "]
     title = "Sign Up"
     msg = "Enter your new account details:"
     values = [""] * len(fields)
 
+    #This loop will continue until the user enters valid details or cancels the registration
     while True:
+        # Display the multienterbox for user input and store the values
         values = multenterbox(msg, title, fields, values)
         if values is None:
             return False
-
+        
+        #uses the values entered by the user to check for errors
         username, password, confirm, year_str = values
-        errmsg = ""
+        errmsg = "" #This variable will store any error messages that need to be displayed to the user
 
+        # Check for empty fields and other validation errors
         for i in range(len(fields)):
             if values[i].strip() == "":
                 errmsg += f'"{fields[i]}" is a required field.\n\n'
 
+        #if username already exists, invalid length, or password mismatch, or age add to errmsg
         if username in users:
             errmsg += "Username already exists.\n\n"
         if not valid_length(username, MIN_USER_LENGTH, MAX_USER_LENGTH, "Username"):
@@ -65,71 +77,84 @@ def register_user(users):
             year = int(year_str)
             if year not in YEAR_ELIGIBILITY:
                 errmsg += "Only students in Years 9–13 are eligible.\n\n"
-
+        # If there are any error messages, display them and continue the loop
         if errmsg:
             msg = errmsg + "Please correct the following:"
             continue
 
+        # If all validations pass, run the function to save the user
         save_user(username, password)
         users[username] = password
         msgbox("Account created successfully!")
         return True
-
+    
+# The login system function handles user login and registration
 def login_system():
     users = load_users()
     while True:
+        #if there are no users, prompt the user to sign up
         action = buttonbox("Welcome to the Café App!\nDo you want to Log In or Sign Up?", "Login System", choices=["Log In", "Sign Up", "Exit"])
-        if action == "Exit" or action is None:
+        if action == "Exit" or action is None: #if the user chooses to exit, display a message and exit the app
             msgbox("Exiting app. Goodbye!", "Exit")
             exit()
+        #if the user chooses to sign up, call the register_user function
         elif action == "Sign Up":
             register_user(users)
+        #if the user chooses to log in, prompt them for their username and password
         elif action == "Log In":
-            for attempt in range(LOGIN_ATTEMPS):
-                fields = ["Username", "Password"]
+            for attempt in range(LOGIN_ATTEMPS): # Allow up to 3 login attempts
+                fields = ["Username", "Password"] #fields for username and password
                 values = multenterbox("Enter your login details:", "Log In", fields)
-                if values is None:
+                if values is None: #if the user cancels the login, exit the loop
                     break
                 username, password = values
+                #if either field is empty, display an error message and continue the loop
                 if not username.strip() or not password.strip():
                     msgbox("Both fields are required.")
                     continue
+                #if the username and password match, display a welcome message and exit the loop
                 if users.get(username) == password:
                     msgbox(f"Welcome, {username}!")
                     return
                 else:
+                    #else, if the username and password do not match, display an error message
                     msgbox("Incorrect username or password.")
             else:
-                msgbox("Too many failed attempts. Exiting.")
+                msgbox("Too many failed attempts. Exiting.") #exit program after 3 failed attempts
                 exit()
-
+#loads the menu from menu.txt  
 def load_menu():
     menu_items = {}
-    with open(MENU_FILE, "r") as file:
-        reader = csv.reader(file)
+    with open(MENU_FILE, "r") as file: 
+        reader = csv.reader(file) #set reader to read the file
         for row in reader:
-            if not row or row[0].startswith("#"):
+            if not row or row[0].startswith("#"): # Skip empty lines and comments in text file
                 continue
-            number, name, price = row
-            menu_items[int(number)] = {"name": name.strip(), "price": float(price.strip())}
+            number, name, price = row # Split row into number, name, and price
+            # Convert number to integer and price to float, and store in dictionary
+            menu_items[int(number)] = {"name": name.strip(), "price": float(price.strip())} 
     return menu_items
 
+# Displays the café menu in a Tkinter window
 def display_menu(menu_items):
+    # Create a Tkinter window to display the menu
     root = tk.Tk()
     root.title("Café Menu for Students")
-    root.geometry("550x400")
+    root.geometry("350x400")
 
-    tk.Label(root, text="Café Menu", font=("Arial", 16)).pack(pady=10)
-
+    #create the title label to its size and font
+    tk.Label(root, text="Café Menu", font=("Verdana Bold", 16)).pack(pady=10)
+    
+    #from the number of items in the menu, create a label for each item
     for number in sorted(menu_items):
         item = menu_items[number]
         label = f"{number}. {item['name']} - ${item['price']:.2f}"
         tk.Label(root, text=label, font=("Arial", 12), anchor="w").pack(fill="x", padx=20, pady=2)
-
+    # Create a button to close the menu window
     tk.Button(root, text="Close", command=root.destroy).pack(pady=15)
 
     root.mainloop()
-
+#checks 
 def valid_quantity(qty):
     return MIN_QUANTITY <= qty <= MAX_QUANTITY
 
