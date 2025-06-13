@@ -182,6 +182,7 @@ def get_order(menu_items):
             if cart.get(num, 0) > 0:
                 cart[num] -= 1
                 update_summary()
+
         # This function closes the cart manager window
         def finish():
             root.destroy()
@@ -206,33 +207,35 @@ def get_order(menu_items):
         ttk.Label(root, textvariable=summary_text, justify="left").pack(pady=5)
 
         ttk.Button(root, text="Done", command=finish).pack(pady=15)
-
+        #update the summary text to show the current cart items
         update_summary()
-        root.mainloop()
+        root.mainloop() #Continues the main loop of the cart manager window until choice is made
 
+     #This function displays the order history, showing the current items in the cart
     def show_order_history():
         if not cart:
             msgbox("No order history yet.")
             return
         history = "Your Current Order:\n"
-        for number in cart:
+        for number in cart: # Iterate through the cart items
             item = menu_items[number]
             qty = cart[number]
-            if qty > 0:
-                history += f"{item['name']} x{qty}\n"
+            if qty > 0: # Only show items with a quantity greater than 0
+                history += f"{item['name']} x{qty}\n" #add the item name and quantity to the history
         textbox("Order History", "Previously Ordered Items", history)
 
-    while True:
+    while True: # Display the cart manager options from order, histroy, and finish
+        #The unique code like "U0001F6D2" is used to add emojis to the buttons,
         action = buttonbox("Choose an option:", "Order Menu", choices=["\U0001F6D2 Order", "\U0001F4DC Order History", "✅ Finish"])
-        if action is None or action == "✅ Finish":
+        if action is None or action == "✅ Finish": #if the user chooses to finish or cancels, break the loop
             break
-        elif action == "\U0001F6D2 Order":
-            open_cart_manager(cart, menu_items)
+        elif action == "\U0001F6D2 Order": 
+            open_cart_manager(cart, menu_items)#if users choose to order, open the cart manager window
         elif action == "\U0001F4DC Order History":
-            show_order_history()
+            show_order_history()#If users choose history,run function.
 
     return cart
-
+#The function displays the order summary, showing the items ordered and their total cost
 def display_summary(cart, menu_items):
     if not cart:
         msgbox("You have not ordered anything.")
@@ -247,6 +250,9 @@ def display_summary(cart, menu_items):
     summary += f"\nTotal Price: ${total:.2f}"
     textbox("Order Summary", "Your Order", summary)
 
+'''This function is the main entry point of the program, 
+calling the login system, loading the menu, displaying it,
+ and managing the order process'''
 def main():
     login_system()
     menu_items = load_menu()
