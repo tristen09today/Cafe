@@ -14,20 +14,27 @@ MIN_QUANTITY = 1
 #constants for login and registration
 MENU_FILE = "menu.txt"
 LOGIN_FILE = "Login.txt"
+ORDER_FILE = "orders.txt"  # Added a separate file to store orders
 LOGIN_ATTEMPS = 3
 MIN_PASS_LENGTH = 4
 MAX_PASS_LENGTH = 15
 MIN_USER_LENGTH = 3
 MAX_USER_LENGTH = 15
 
+# Global variable to track the logged-in user
+current_user = None
+
 # Load users from file and format them into a dictionary
 def load_users():
     users = {}
     with open(LOGIN_FILE, "r") as file:
         for line in file:
-            if line.strip():
-                username, password = line.strip().split(",") # This formats the file into a dictionary
-                users[username] = password
+            if line.strip() and "," in line:  # Avoid unpacking order lines
+                try:
+                    username, password = line.strip().split(",") # This formats the file into a dictionary
+                    users[username] = password
+                except ValueError:
+                    continue
     return users
 
 # Save new user to file
@@ -92,6 +99,7 @@ def register_user(users):
 
 # The login system function handles user login and registration
 def login_system():
+    global current_user
     users = load_users()
     while True:
         #if there are no users, prompt the user to sign up
@@ -116,6 +124,7 @@ def login_system():
                     continue
                 #if the username and password match, display a welcome message and exit the loop
                 if users.get(username) == password:
+                    current_user = username
                     msgbox(f"Welcome, {username}!")
                     return
                 else:
@@ -259,9 +268,9 @@ def display_summary(cart, menu_items):
     full_summary = f"{summary}\n\nOrder Number: #{order_number}\nPickup Time: {pickup_time}"
     textbox("Order Summary", "Your Order", full_summary)
 
-    # Append order number and pickup time to the login file
-    with open(LOGIN_FILE, "a") as file:
-        file.write(f"Order #{order_number} placed at {pickup_time}\n")
+    # Save to orders file with user info
+    with open(ORDER_FILE, "a") as f:
+        f.write(f"{current_user},{pickup_time},#{order_number},Total=${total:.2f}\n")
 
 '''This function is the main entry point of the program, 
 calling the login system, loading the menu, displaying it,
