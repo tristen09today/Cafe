@@ -1,9 +1,11 @@
-'''For version 3 of the café app, we will implement a login system, a menu display,
+'''For version 4 of the café app, we will implement a login system, a menu display,
  and an order management system. '''
 from easygui import *
 import tkinter as tk
 from tkinter import ttk
 import csv
+import random  # Added to generate a random order number
+from datetime import datetime  # Added to get the current date and time
 
 # Constants
 YEAR_ELIGIBILITY = [9, 10, 11, 12, 13]
@@ -50,7 +52,7 @@ def register_user(users):
         values = multenterbox(msg, title, fields, values)
         if values is None:
             return False
-        
+
         #uses the values entered by the user to check for errors
         username, password, confirm, year_str = values
         errmsg = "" #This variable will store any error messages that need to be displayed to the user
@@ -87,7 +89,7 @@ def register_user(users):
         users[username] = password
         msgbox("Account created successfully!")
         return True
-    
+
 # The login system function handles user login and registration
 def login_system():
     users = load_users()
@@ -239,6 +241,7 @@ def display_summary(cart, menu_items):
     if not cart:
         msgbox("You have not ordered anything.")
         return
+
     summary = "Order Summary:\n"
     total = 0
     for number, quantity in cart.items():
@@ -247,7 +250,18 @@ def display_summary(cart, menu_items):
         summary += f"{item['name']} x{quantity} = ${cost:.2f}\n"
         total += cost
     summary += f"\nTotal Price: ${total:.2f}"
-    textbox("Order Summary", "Your Order", summary)
+
+    # Generate a random order number and current time
+    order_number = random.randint(10000, 99999)
+    pickup_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    # Display the summary with the order number and pickup time
+    full_summary = f"{summary}\n\nOrder Number: #{order_number}\nPickup Time: {pickup_time}"
+    textbox("Order Summary", "Your Order", full_summary)
+
+    # Append order number and pickup time to the login file
+    with open(LOGIN_FILE, "a") as file:
+        file.write(f"Order #{order_number} placed at {pickup_time}\n")
 
 '''This function is the main entry point of the program, 
 calling the login system, loading the menu, displaying it,
@@ -260,7 +274,3 @@ def main():
     display_summary(cart, menu_items)
 
 main()
-    
-
-
-
