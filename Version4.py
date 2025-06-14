@@ -29,7 +29,7 @@ TIME_SLOTS = [
     ]
 
 MENU_CHOICE=[
-    "\U0001F6D2 Order", "\U0001F4DC Cart", "✅ Finish", "⌕ Order History"
+    "\U0001F6D2 Order", "\U0001F4DC Cart", "✅ Finish", "🧾 Order History"
     ]
 
 
@@ -235,9 +235,9 @@ def get_order(menu_items):
         root.mainloop() #Continues the main loop of the cart manager window until choice is made
 
      #This function displays the order history, showing the current items in the cart
-    def show_order_history():
+    def cart_summary():
         if not cart:
-            msgbox("No order history yet.")
+            msgbox("Nothing in cart yet.")
             return
         history = "Your Current Order:\n"
         for number in cart: # Iterate through the cart items
@@ -246,6 +246,8 @@ def get_order(menu_items):
             if qty > 0: # Only show items with a quantity greater than 0
                 history += f"{item['name']} x{qty}\n" #add the item name and quantity to the history
         textbox("Order History", "Previously Ordered Items", history)
+           
+
 
     while True: # Display the cart manager options from order, histroy, and finish
         action = buttonbox("Choose an option:", "Order Menu", choices=MENU_CHOICE)
@@ -254,7 +256,9 @@ def get_order(menu_items):
         elif action == "\U0001F6D2 Order": 
             open_cart_manager(cart, menu_items)#if users choose to order, open the cart manager window
         elif action == "\U0001F4DC Cart":
-            show_order_history()#If users choose history,run function.
+            cart_summary()#If users choose history,run function.
+        elif action == "🧾 Order History":
+            order_history()
 
     return cart
 
@@ -263,6 +267,49 @@ def display_summary(cart, menu_items):
     if not cart:
         msgbox("You have not ordered anything.")
         return
+    
+# Tkinter-based Order History Viewer from the orders.txt file
+def  order_history():
+    if not current_user:
+        msgbox("No user logged in.")
+        return
+
+    user_orders = []
+    with open(ORDER_FILE, "r") as f:
+        for line in f:
+            if line.strip() and line.startswith(current_user + ","):
+                parts = line.strip().split(",")
+                if len(parts) >= 5:
+                    user_orders.append(parts)
+
+    if not user_orders:
+        msgbox("No order history found for your account.")
+        return
+
+    # Tkinter window to display order history in a table
+    root = tk.Tk()
+    root.title("🧾 Your Order History")
+    root.geometry("650x300")
+
+    tree = ttk.Treeview(root, columns=("Username", "Ordered Time", "Pickup Time", "Order #", "Total"), show="headings")
+    tree.heading("Username", text="Username")
+    tree.heading("Ordered Time", text="Ordered Time")
+    tree.heading("Pickup Time", text="Pickup Time")
+    tree.heading("Order #", text="Order #")
+    tree.heading("Total", text="Total")
+
+    # Add scrollbar
+    vsb = ttk.Scrollbar(root, orient="vertical", command=tree.yview)
+    tree.configure(yscrollcommand=vsb.set)
+    vsb.pack(side='right', fill='y')
+    tree.pack(expand=True, fill='both')
+
+    for order in user_orders:
+        tree.insert("", "end", values=order)
+
+    tk.Button(root, text="Close", command=root.destroy).pack(pady=8)
+    root.mainloop()
+
 
     summary = "Order Summary:\n"
     total = 0
