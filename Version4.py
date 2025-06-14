@@ -29,7 +29,7 @@ TIME_SLOTS = [
     ]
 
 MENU_CHOICE=[
-    "\U0001F6D2 Order", "\U0001F4DC Cart", "✅ Finish"
+    "\U0001F6D2 Order", "\U0001F4DC Cart", "✅ Finish", "⌕ Order History"
     ]
 
 
