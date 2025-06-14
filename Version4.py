@@ -246,8 +246,8 @@ def get_order(menu_items):
             if qty > 0: # Only show items with a quantity greater than 0
                 history += f"{item['name']} x{qty}\n" #add the item name and quantity to the history
         textbox("Order History", "Previously Ordered Items", history)
-           
 
+        
 
     while True: # Display the cart manager options from order, histroy, and finish
         action = buttonbox("Choose an option:", "Order Menu", choices=MENU_CHOICE)
@@ -258,18 +258,11 @@ def get_order(menu_items):
         elif action == "\U0001F4DC Cart":
             cart_summary()#If users choose history,run function.
         elif action == "🧾 Order History":
-            order_history()
-
+            history_orders()
+                
     return cart
-
-#The function displays the order summary, showing the items ordered and their total cost
-def display_summary(cart, menu_items):
-    if not cart:
-        msgbox("You have not ordered anything.")
-        return
-    
-# Tkinter-based Order History Viewer from the orders.txt file
-def  order_history():
+# This function retrieves the order history for the current user and displays it in a Tkinter window
+def history_orders():
     if not current_user:
         msgbox("No user logged in.")
         return
@@ -310,6 +303,13 @@ def  order_history():
     tk.Button(root, text="Close", command=root.destroy).pack(pady=8)
     root.mainloop()
 
+
+
+#The function displays the order summary, showing the items ordered and their total cost
+def display_summary(cart, menu_items):
+    if not cart:
+        msgbox("You have not ordered anything.")
+        return
 
     summary = "Order Summary:\n"
     total = 0
