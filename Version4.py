@@ -263,18 +263,16 @@ def get_order(menu_items):
     return cart
 # This function retrieves the order history for the current user and displays it in a Tkinter window
 def history_orders():
-    if not current_user:
-        msgbox("No user logged in.")
-        return
-
     user_orders = []
+    #open the order file and read the lines
     with open(ORDER_FILE, "r") as f:
         for line in f:
-            if line.strip() and line.startswith(current_user + ","):
-                parts = line.strip().split(",")
-                if len(parts) >= 5:
+            if line.strip() and line.startswith(current_user + ","): # Check if the line starts with the current user's username
+                parts = line.strip().split(",") #Split the line into parts
+                if len(parts) >= 5: # Ensure there are enough parts to unpack
                     user_orders.append(parts)
 
+    # If no orders found, display a message and return
     if not user_orders:
         msgbox("No order history found for your account.")
         return
@@ -283,7 +281,7 @@ def history_orders():
     root = tk.Tk()
     root.title("🧾 Your Order History")
     root.geometry("650x300")
-
+    # Create a Treeview widget to display the order history
     tree = ttk.Treeview(root, columns=("Username", "Ordered Time", "Pickup Time", "Order #", "Total"), show="headings")
     tree.heading("Username", text="Username")
     tree.heading("Ordered Time", text="Ordered Time")
@@ -291,15 +289,16 @@ def history_orders():
     tree.heading("Order #", text="Order #")
     tree.heading("Total", text="Total")
 
-    # Add scrollbar
-    vsb = ttk.Scrollbar(root, orient="vertical", command=tree.yview)
+    #vertical scrollbar for the treeview
+    vsb = ttk.Scrollbar(root, orient="vertical", command=tree.yview) #
     tree.configure(yscrollcommand=vsb.set)
     vsb.pack(side='right', fill='y')
     tree.pack(expand=True, fill='both')
 
+    # Insert each order into the treeview
     for order in user_orders:
         tree.insert("", "end", values=order)
-
+    # Create a label for the title
     tk.Button(root, text="Close", command=root.destroy).pack(pady=8)
     root.mainloop()
 
