@@ -1,31 +1,52 @@
-'''For version 3 of the café app, we will implement a login system, a menu display,
+'''For version 4 of the café app, we will implement a login system, a menu display,
  and an order management system. '''
 from easygui import *
 import tkinter as tk
 from tkinter import ttk
 import csv
+import random  # Added to generate a random order number
+from datetime import datetime  # Added to get the current date and time
 
 # Constants
 YEAR_ELIGIBILITY = [9, 10, 11, 12, 13]
 MAX_QUANTITY = 50
 MIN_QUANTITY = 1
-#constants for login and registration
+
+#Constants for login and registration
 MENU_FILE = "menu.txt"
 LOGIN_FILE = "Login.txt"
+ORDER_FILE = "orders.txt"  # Added a separate file to store orders
 LOGIN_ATTEMPS = 3
 MIN_PASS_LENGTH = 4
 MAX_PASS_LENGTH = 15
 MIN_USER_LENGTH = 3
 MAX_USER_LENGTH = 15
 
+#Constant For ordering
+  # Let the user select from preset pickup time slots
+TIME_SLOTS = [
+        "10:45 AM", "11:05 AM", "1:30 PM", "2:10 PM", "Cancel Order"
+    ]
+
+MENU_CHOICE=[
+    "\U0001F6D2 Order", "\U0001F4DC Cart", "✅ Finish", "🧾 Order History"
+    ]
+
+
+# Global variable to track the logged-in user
+current_user = None
+
 # Load users from file and format them into a dictionary
 def load_users():
     users = {}
     with open(LOGIN_FILE, "r") as file:
         for line in file:
-            if line.strip():
-                username, password = line.strip().split(",") # This formats the file into a dictionary
-                users[username] = password
+            if line.strip() and "," in line:  # Avoid unpacking order lines
+                try:
+                    username, password = line.strip().split(",") # This formats the file into a dictionary
+                    users[username] = password
+                except ValueError:
+                    continue
     return users
 
 # Save new user to file
@@ -50,7 +71,7 @@ def register_user(users):
         values = multenterbox(msg, title, fields, values)
         if values is None:
             return False
-        
+
         #uses the values entered by the user to check for errors
         username, password, confirm, year_str = values
         errmsg = "" #This variable will store any error messages that need to be displayed to the user
@@ -87,9 +108,10 @@ def register_user(users):
         users[username] = password
         msgbox("Account created successfully!")
         return True
-    
+
 # The login system function handles user login and registration
 def login_system():
+    global current_user
     users = load_users()
     while True:
         #if there are no users, prompt the user to sign up
@@ -114,6 +136,7 @@ def login_system():
                     continue
                 #if the username and password match, display a welcome message and exit the loop
                 if users.get(username) == password:
+                    current_user = username
                     msgbox(f"Welcome, {username}!")
                     return
                 else:
@@ -189,7 +212,7 @@ def get_order(menu_items):
         # Create the main window for the cart manager
         root = tk.Tk()
         root.title("Cart Manager")
-        root.geometry("450x600")
+        root.geometry("450x700")
 
         # Create a label for the cart manager title
         ttk.Label(root, text="Edit Your Cart", font=("Arial", 14)).pack(pady=10)
@@ -212,9 +235,9 @@ def get_order(menu_items):
         root.mainloop() #Continues the main loop of the cart manager window until choice is made
 
      #This function displays the order history, showing the current items in the cart
-    def show_order_history():
+    def cart_summary():
         if not cart:
-            msgbox("No order history yet.")
+            msgbox("🛒 Your cart is empty.", "Cart Summary")
             return
         history = "Your Current Order:\n"
         for number in cart: # Iterate through the cart items
@@ -222,23 +245,70 @@ def get_order(menu_items):
             qty = cart[number]
             if qty > 0: # Only show items with a quantity greater than 0
                 history += f"{item['name']} x{qty}\n" #add the item name and quantity to the history
-        textbox("Order History", "Previously Ordered Items", history)
+        msgbox(history, "🛒Cart Summary") # Display the cart summary in a message box
+
+        
 
     while True: # Display the cart manager options from order, histroy, and finish
-        action = buttonbox("Choose an option:", "Order Menu", choices=["\U0001F6D2 Order", "\U0001F4DC Order History", "✅ Finish"])
+        action = buttonbox("Choose an option:", "Order Menu", choices=MENU_CHOICE)
         if action is None or action == "✅ Finish": #if the user chooses to finish or cancels, break the loop
             break
         elif action == "\U0001F6D2 Order": 
             open_cart_manager(cart, menu_items)#if users choose to order, open the cart manager window
-        elif action == "\U0001F4DC Order History":
-            show_order_history()#If users choose history,run function.
-
+        elif action == "\U0001F4DC Cart":
+            cart_summary()#If users choose history,run function.
+        elif action == "🧾 Order History":
+            history_orders()
+                
     return cart
+# This function retrieves the order history for the current user and displays it in a Tkinter window
+def history_orders():
+    user_orders = []
+    #open the order file and read the lines
+    with open(ORDER_FILE, "r") as f:
+        for line in f:
+            if line.strip() and line.startswith(current_user + ","): # Check if the line starts with the current user's username
+                parts = line.strip().split(",") #Split the line into parts
+                if len(parts) >= 5: # Ensure there are enough parts to unpack
+                    user_orders.append(parts)
+
+    # If no orders found, display a message and return
+    if not user_orders:
+        msgbox("No order history found for your account.")
+        return
+
+    # Tkinter window to display order history in a table
+    root = tk.Tk()
+    root.title("🧾 Your Order History")
+    root.geometry("650x300")
+    # Create a Treeview widget to display the order history
+    tree = ttk.Treeview(root, columns=("Username", "Ordered Time", "Pickup Time", "Order #", "Total"), show="headings")
+    tree.heading("Username", text="Username")
+    tree.heading("Ordered Time", text="Ordered Time")
+    tree.heading("Pickup Time", text="Pickup Time")
+    tree.heading("Order #", text="Order #")
+    tree.heading("Total", text="Total")
+
+    #vertical scrollbar for the treeview
+    vsb = ttk.Scrollbar(root, orient="vertical", command=tree.yview) #
+    tree.configure(yscrollcommand=vsb.set)
+    vsb.pack(side='right', fill='y')
+    tree.pack(expand=True, fill='both')
+
+    # Insert each order into the treeview
+    for order in user_orders:
+        tree.insert("", "end", values=order)
+    # Create a label for the title
+    tk.Button(root, text="Close", command=root.destroy).pack(pady=8)
+    root.mainloop()
+
+
 #The function displays the order summary, showing the items ordered and their total cost
 def display_summary(cart, menu_items):
     if not cart:
         msgbox("You have not ordered anything.")
         return
+
     summary = "Order Summary:\n"
     total = 0
     for number, quantity in cart.items():
@@ -247,7 +317,39 @@ def display_summary(cart, menu_items):
         summary += f"{item['name']} x{quantity} = ${cost:.2f}\n"
         total += cost
     summary += f"\nTotal Price: ${total:.2f}"
-    textbox("Order Summary", "Your Order", summary)
+
+    # Ask user to select pickup time with validation loop
+    while True:
+        pickup_time = buttonbox("Select your preferred pickup time:", "Pickup Time", choices=TIME_SLOTS)
+
+        if not pickup_time or pickup_time == "Cancel Order":
+            msgbox("Returning to order menu.")
+            # Send them back to edit cart
+            cart = get_order(menu_items)  # Let user review/edit the cart again
+            display_summary(cart, menu_items)  # Restart summary process
+            return
+
+        # Confirm the pickup time
+        confirm = buttonbox(f"You selected {pickup_time}.\nAre you sure you want this time?", "Confirm Pickup Time", choices=["Yes", "No"])
+        if confirm == "Yes":
+            ordered_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+            break
+        # If "No", loop again to choose time
+
+    # Final confirmation before placing the order
+    final = buttonbox(f"{summary}\n\nPickup Time: {pickup_time}\n\nAre you ready to place your order?", "Final Confirmation", choices=["Yes", "No"])
+    if final != "Yes":
+        msgbox("Returning to order menu.")
+        cart = get_order(menu_items)  # Allow user to re-edit order
+        display_summary(cart, menu_items)  # Restart the summary
+        return
+
+    # Generate order number and save
+    order_number = random.randint(10000, 99999)
+    with open(ORDER_FILE, "a") as f:
+        f.write(f"{current_user},{ordered_time},{pickup_time},#{order_number},Total=${total:.2f}\n")
+
+    msgbox(f"✅ Order placed successfully!\n\nOrder Number: #{order_number}\nPickup Time: {pickup_time}")
 
 '''This function is the main entry point of the program, 
 calling the login system, loading the menu, displaying it,
@@ -260,7 +362,3 @@ def main():
     display_summary(cart, menu_items)
 
 main()
-    
-
-
-
