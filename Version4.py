@@ -22,11 +22,16 @@ MAX_PASS_LENGTH = 15
 MIN_USER_LENGTH = 3
 MAX_USER_LENGTH = 15
 
-#Constant 
+#Constant For ordering
   # Let the user select from preset pickup time slots
 TIME_SLOTS = [
         "10:45 AM", "11:05 AM", "1:30 PM", "2:10 PM", "Cancel Order"
     ]
+
+MENU_CHOICE=[
+    "\U0001F6D2 Order", "\U0001F4DC Cart", "✅ Finish"
+    ]
+
 
 # Global variable to track the logged-in user
 current_user = None
@@ -243,7 +248,7 @@ def get_order(menu_items):
         textbox("Order History", "Previously Ordered Items", history)
 
     while True: # Display the cart manager options from order, histroy, and finish
-        action = buttonbox("Choose an option:", "Order Menu", choices=["\U0001F6D2 Order", "\U0001F4DC Cart", "✅ Finish"])
+        action = buttonbox("Choose an option:", "Order Menu", choices=MENU_CHOICE)
         if action is None or action == "✅ Finish": #if the user chooses to finish or cancels, break the loop
             break
         elif action == "\U0001F6D2 Order": 
