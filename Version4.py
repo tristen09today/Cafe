@@ -243,7 +243,7 @@ def get_order(menu_items):
         textbox("Order History", "Previously Ordered Items", history)
 
     while True: # Display the cart manager options from order, histroy, and finish
-        action = buttonbox("Choose an option:", "Order Menu", choices=["\U0001F6D2 Order", "\U0001F4DC Cart ", "✅ Finish"])
+        action = buttonbox("Choose an option:", "Order Menu", choices=["\U0001F6D2 Order", "\U0001F4DC Cart", "✅ Finish"])
         if action is None or action == "✅ Finish": #if the user chooses to finish or cancels, break the loop
             break
         elif action == "\U0001F6D2 Order": 
@@ -269,41 +269,37 @@ def display_summary(cart, menu_items):
     summary += f"\nTotal Price: ${total:.2f}"
 
     # Ask user to select pickup time with validation loop
-       # Ask user to select pickup time with validation loop
     while True:
-        try:
-            pickup_time = buttonbox("Select your preferred pickup time:", "Pickup Time", choices=TIME_SLOTS)
+        pickup_time = buttonbox("Select your preferred pickup time:", "Pickup Time", choices=TIME_SLOTS)
 
-            if not pickup_time:
-                msgbox("You must select a pickup time.")
-                continue
-            if pickup_time == "Cancel Order":
-                msgbox("Order cancelled.")
-                return
+        if not pickup_time or pickup_time == "Cancel Order":
+            msgbox("Returning to order menu.")
+            # Send them back to edit cart
+            cart = get_order(menu_items)  # Let user review/edit the cart again
+            display_summary(cart, menu_items)  # Restart summary process
+            return
 
-            # Confirm the user's choice
-            confirm = buttonbox(f"You selected {pickup_time}.\nAre you sure you want this time?", "Confirm Pickup Time", choices=["Yes", "No"])
-            if confirm == "Yes":
-                ordered_time = datetime.now().strftime("%Y-%m-%d %H:%M")
-                break  # Proceed
-            else:
-                continue  # Loop back to time selection
+        # Confirm the pickup time
+        confirm = buttonbox(f"You selected {pickup_time}.\nAre you sure you want this time?", "Confirm Pickup Time", choices=["Yes", "No"])
+        if confirm == "Yes":
+            ordered_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+            break
+        # If "No", loop again to choose time
 
-        except ValueError:
-            msgbox("Invalid input. Please select a valid pickup time.")
-            continue
+    # Final confirmation before placing the order
+    final = buttonbox(f"{summary}\n\nPickup Time: {pickup_time}\n\nAre you ready to place your order?", "Final Confirmation", choices=["Yes", "No"])
+    if final != "Yes":
+        msgbox("Returning to order menu.")
+        cart = get_order(menu_items)  # Allow user to re-edit order
+        display_summary(cart, menu_items)  # Restart the summary
+        return
 
-
-    # Generate a random order number
+    # Generate order number and save
     order_number = random.randint(10000, 99999)
-
-    # Display the summary with the order number and pickup time
-    full_summary = f"{summary}\n\n #Ordered Placed: {ordered_time}\n #Order Number:{order_number}\n Pickup Time: {pickup_time}"
-    textbox("Order Summary", "Your Order", full_summary)
-
-    # Save to orders file with user info
     with open(ORDER_FILE, "a") as f:
         f.write(f"{current_user},{ordered_time},{pickup_time},#{order_number},Total=${total:.2f}\n")
+
+    msgbox(f"✅ Order placed successfully!\n\nOrder Number: #{order_number}\nPickup Time: {pickup_time}")
 
 '''This function is the main entry point of the program, 
 calling the login system, loading the menu, displaying it,
