@@ -212,7 +212,7 @@ def get_order(menu_items):
         # Create the main window for the cart manager
         root = tk.Tk()
         root.title("Cart Manager")
-        root.geometry("450x600")
+        root.geometry("450x700")
 
         # Create a label for the cart manager title
         ttk.Label(root, text="Edit Your Cart", font=("Arial", 14)).pack(pady=10)
@@ -237,7 +237,7 @@ def get_order(menu_items):
      #This function displays the order history, showing the current items in the cart
     def cart_summary():
         if not cart:
-            msgbox("Nothing in cart yet.")
+            msgbox("🛒 Your cart is empty.", "Cart Summary")
             return
         history = "Your Current Order:\n"
         for number in cart: # Iterate through the cart items
@@ -245,7 +245,7 @@ def get_order(menu_items):
             qty = cart[number]
             if qty > 0: # Only show items with a quantity greater than 0
                 history += f"{item['name']} x{qty}\n" #add the item name and quantity to the history
-        textbox("Order History", "Previously Ordered Items", history)
+        msgbox(history, "🛒Cart Summary") # Display the cart summary in a message box
 
         
 
@@ -301,7 +301,6 @@ def history_orders():
     # Create a label for the title
     tk.Button(root, text="Close", command=root.destroy).pack(pady=8)
     root.mainloop()
-
 
 
 #The function displays the order summary, showing the items ordered and their total cost
@@ -363,4 +362,3 @@ def main():
     display_summary(cart, menu_items)
 
 main()
-
