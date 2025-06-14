@@ -11,7 +11,8 @@ from datetime import datetime  # Added to get the current date and time
 YEAR_ELIGIBILITY = [9, 10, 11, 12, 13]
 MAX_QUANTITY = 50
 MIN_QUANTITY = 1
-#constants for login and registration
+
+#Constants for login and registration
 MENU_FILE = "menu.txt"
 LOGIN_FILE = "Login.txt"
 ORDER_FILE = "orders.txt"  # Added a separate file to store orders
@@ -20,6 +21,12 @@ MIN_PASS_LENGTH = 4
 MAX_PASS_LENGTH = 15
 MIN_USER_LENGTH = 3
 MAX_USER_LENGTH = 15
+
+#Constant 
+  # Let the user select from preset pickup time slots
+TIME_SLOTS = [
+        "10:45 AM", "11:05 AM", "1:30 PM", "2:10 PM"  
+    ]
 
 # Global variable to track the logged-in user
 current_user = None
@@ -236,7 +243,7 @@ def get_order(menu_items):
         textbox("Order History", "Previously Ordered Items", history)
 
     while True: # Display the cart manager options from order, histroy, and finish
-        action = buttonbox("Choose an option:", "Order Menu", choices=["\U0001F6D2 Order", "\U0001F4DC Order History", "✅ Finish"])
+        action = buttonbox("Choose an option:", "Order Menu", choices=["\U0001F6D2 Order", "\U0001F4DC Cart ", "✅ Finish"])
         if action is None or action == "✅ Finish": #if the user chooses to finish or cancels, break the loop
             break
         elif action == "\U0001F6D2 Order": 
@@ -245,6 +252,7 @@ def get_order(menu_items):
             show_order_history()#If users choose history,run function.
 
     return cart
+
 #The function displays the order summary, showing the items ordered and their total cost
 def display_summary(cart, menu_items):
     if not cart:
@@ -260,9 +268,14 @@ def display_summary(cart, menu_items):
         total += cost
     summary += f"\nTotal Price: ${total:.2f}"
 
-    # Generate a random order number and current time
+  
+    pickup_time = buttonbox("Select your preferred pickup time:", "Pickup Time", choices=TIME_SLOTS)
+
+    if not pickup_time:
+        pickup_time = "Not specified"
+
+    # Generate a random order number
     order_number = random.randint(10000, 99999)
-    pickup_time = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     # Display the summary with the order number and pickup time
     full_summary = f"{summary}\n\nOrder Number: #{order_number}\nPickup Time: {pickup_time}"
