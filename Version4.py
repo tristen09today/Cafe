@@ -25,7 +25,7 @@ MAX_USER_LENGTH = 15
 #Constant 
   # Let the user select from preset pickup time slots
 TIME_SLOTS = [
-        "10:45 AM", "11:05 AM", "1:30 PM", "2:10 PM"  
+        "10:45 AM", "11:05 AM", "1:30 PM", "2:10 PM", "Cancel Order"
     ]
 
 # Global variable to track the logged-in user
@@ -248,7 +248,7 @@ def get_order(menu_items):
             break
         elif action == "\U0001F6D2 Order": 
             open_cart_manager(cart, menu_items)#if users choose to order, open the cart manager window
-        elif action == "\U0001F4DC Order History":
+        elif action == "\U0001F4DC Cart":
             show_order_history()#If users choose history,run function.
 
     return cart
@@ -277,6 +277,9 @@ def display_summary(cart, menu_items):
             if not pickup_time:
                 msgbox("You must select a pickup time.")
                 continue
+            if pickup_time == "Cancel Order":
+                msgbox("Order cancelled.")
+                return
 
             # Confirm the user's choice
             confirm = buttonbox(f"You selected {pickup_time}.\nAre you sure you want this time?", "Confirm Pickup Time", choices=["Yes", "No"])
