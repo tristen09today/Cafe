@@ -269,6 +269,7 @@ def display_summary(cart, menu_items):
     summary += f"\nTotal Price: ${total:.2f}"
 
     # Ask user to select pickup time with validation loop
+       # Ask user to select pickup time with validation loop
     while True:
         try:
             pickup_time = buttonbox("Select your preferred pickup time:", "Pickup Time", choices=TIME_SLOTS)
@@ -276,18 +277,25 @@ def display_summary(cart, menu_items):
             if not pickup_time:
                 msgbox("You must select a pickup time.")
                 continue
-            else:
+
+            # Confirm the user's choice
+            confirm = buttonbox(f"You selected {pickup_time}.\nAre you sure you want this time?", "Confirm Pickup Time", choices=["Yes", "No"])
+            if confirm == "Yes":
                 ordered_time = datetime.now().strftime("%Y-%m-%d %H:%M")
-                break  # Valid selection made
+                break  # Proceed
+            else:
+                continue  # Loop back to time selection
+
         except ValueError:
             msgbox("Invalid input. Please select a valid pickup time.")
             continue
+
 
     # Generate a random order number
     order_number = random.randint(10000, 99999)
 
     # Display the summary with the order number and pickup time
-    full_summary = f"{summary}\n\nOrder Number: #{order_number}\nPickup Time: {pickup_time}"
+    full_summary = f"{summary}\n\n #Ordered Placed: {ordered_time}\n #Order Number:{order_number}\n Pickup Time: {pickup_time}"
     textbox("Order Summary", "Your Order", full_summary)
 
     # Save to orders file with user info
