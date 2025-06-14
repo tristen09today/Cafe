@@ -1,4 +1,4 @@
-username,password 
+username,password
 tristen123,123
 tristen4,None
 tris1,None
@@ -13,8 +13,3 @@ dd,ddd
 fdd,ffff
 ddd,ddddd
 dddd,dddd
-
-Order #32524 placed at 2025-06-14 00:16
-fortnitegamer,1234
-fortnite2,opc12
-tristenshieh22,opclash1234
