@@ -1,1 +1,8 @@
  tristen123,2025-06-14 00:36,#97934,Total=$28.00
+tristen123,10:00 AM,#22528,Total=$27.00
+tristen123,1:30 PM,#15014,Total=$33.00
+tristen123,Not specified,#63209,Total=$33.00
+tristen123,11:05 AM,#68982,Total=$27.50
+tristen123,11:05 AM,#18358,Total=$17.50
+tristen123,10:45 AM,#18158,Total=$21.00
+tristen123,2025-06-14 14:2810:45 AM,#40364,Total=$27.00

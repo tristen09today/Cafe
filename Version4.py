@@ -268,11 +268,20 @@ def display_summary(cart, menu_items):
         total += cost
     summary += f"\nTotal Price: ${total:.2f}"
 
-  
-    pickup_time = buttonbox("Select your preferred pickup time:", "Pickup Time", choices=TIME_SLOTS)
+    # Ask user to select pickup time with validation loop
+    while True:
+        try:
+            pickup_time = buttonbox("Select your preferred pickup time:", "Pickup Time", choices=TIME_SLOTS)
 
-    if not pickup_time:
-        pickup_time = "Not specified"
+            if not pickup_time:
+                msgbox("You must select a pickup time.")
+                continue
+            else:
+                ordered_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+                break  # Valid selection made
+        except ValueError:
+            msgbox("Invalid input. Please select a valid pickup time.")
+            continue
 
     # Generate a random order number
     order_number = random.randint(10000, 99999)
@@ -283,7 +292,7 @@ def display_summary(cart, menu_items):
 
     # Save to orders file with user info
     with open(ORDER_FILE, "a") as f:
-        f.write(f"{current_user},{pickup_time},#{order_number},Total=${total:.2f}\n")
+        f.write(f"{current_user},{ordered_time},{pickup_time},#{order_number},Total=${total:.2f}\n")
 
 '''This function is the main entry point of the program, 
 calling the login system, loading the menu, displaying it,
@@ -296,3 +305,4 @@ def main():
     display_summary(cart, menu_items)
 
 main()
+
