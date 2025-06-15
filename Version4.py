@@ -155,6 +155,11 @@ def login_system():
                 exit()
 #loads the menu from menu.txt  
 def load_menu():
+    """Loads menu items from the menu file and returns them as a dictionary.
+    Skips empty lines and lines starting with '#'.
+    Returns:
+        dict: Dictionary of menu items with item number as key, and name/price as values.
+    """
     menu_items = {}
     with open(MENU_FILE, "r") as file: 
         reader = csv.reader(file) #set reader to read the file
@@ -185,8 +190,10 @@ def display_menu(menu_items):
     tk.Button(root, text="Close", command=root.destroy).pack(pady=15)
 
     root.mainloop()
-# checks if the quantity is valid, ensuring it is within the lower and upper limits
+
 def valid_quantity(qty):
+    """Checks if the provided quantity is within
+    the minimum and maximum number of items (1) and (50)."""
     return MIN_QUANTITY <= qty <= MAX_QUANTITY
 
 # this function manages the cart, allowing users to add, remove, and view items in their order
@@ -194,9 +201,14 @@ def get_order(menu_items):
     """Manages the user's ordering process.
     Allows item selection, viewing cart, editing cart, and accessing order history."""
     cart = {}
+
     # from the menu items, initialize the cart with each item set to 0
     def open_cart_manager(cart, menu_items):
+        """Opens a Tkinter window to allow the user to edit their cart.
+             Users can add or remove items using buttons. """
+        
         def update_summary():
+            
             summary_text.set("")
             for number in sorted(cart):
                 qty = cart[number] # Get the quantity of each item in the cart
@@ -247,6 +259,7 @@ def get_order(menu_items):
 
      #This function displays the order history, showing the current items in the cart
     def cart_summary():
+        """Displays a simple summary of the current cart contents in a message box."""
         if not cart:
             msgbox("🛒 Your cart is empty.", "Cart Summary")
             return
