@@ -40,14 +40,16 @@ current_user = None
 def load_users():
     users = {}
     try:
-        with open(LOGIN_FILE, "r") as file:
+        with open(LOGIN_FILE, "r") as file:  # Open the login file in read mode
             for line in file:
-                if line.strip() and "," in line:
-                    try:
+                if line.strip() and "," in line:  #This checks if the line is not empty and contains a comma
+                    try: #if the line is not empty and contains a comma, split the line into username and password
                         username, password = line.strip().split(",")
                         users[username] = password
+                    #If the line does not contain a valid username and password, skip it
                     except ValueError:
-                        continue
+                       continue
+    # If the file is not found, display an error message               
     except FileNotFoundError:
         msgbox("Login file not found. Please contact admin.")
     return users
@@ -60,6 +62,7 @@ def save_user(username, password):
 
 #checks if string length of the password or username, ensuring it meets the specified criteria
 def valid_length(value, min_len, max_len, field_name):
+    """Checks if the provided quantity is within valid ordering range."""
     return min_len <= len(value) <= max_len
 
 #The function register's a new user by collecting their details through a multienterbox.
