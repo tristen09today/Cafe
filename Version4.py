@@ -84,15 +84,15 @@ def register_user(users):
         #if username already exists, invalid length, or password mismatch, or age add to errmsg
         if username in users:
             errmsg += "Username already exists.\n\n"
-        if not valid_length(username, MIN_USER_LENGTH, MAX_USER_LENGTH, "Username"):
+        if not valid_length(username, MIN_USER_LENGTH, MAX_USER_LENGTH, "Username"): #if username is not valid length not between 3 and 15 characters, add to errmsg
             errmsg += f"Username must be {MIN_USER_LENGTH}-{MAX_USER_LENGTH} characters.\n\n"
 
-        if not valid_length(password, MIN_PASS_LENGTH, MAX_PASS_LENGTH, "Password"):
+        if not valid_length(password, MIN_PASS_LENGTH, MAX_PASS_LENGTH, "Password"):  #If password is not valid length not between 4 and 15 characters, add to errmsg
             errmsg += f"Password must be {MIN_PASS_LENGTH}-{MAX_PASS_LENGTH} characters.\n\n"
-        if password != confirm:
+        if password != confirm:  #password and confirm do not match, add to errmsg
             errmsg += "Passwords do not match.\n\n"
 
-        if not year_str.isdigit():
+        if not year_str.isdigit():  #if year_str is not a digit, add to errmsg
             errmsg += "Year level must be a number.\n\n"
         else:
             year = int(year_str)
@@ -124,7 +124,7 @@ def login_system():
             register_user(users)
         #if the user chooses to log in, prompt them for their username and password
         elif action == "Log In":
-            for attempt in range(LOGIN_ATTEMPS): # Allow up to 3 login attempts
+            for attempt in range(LOGIN_ATTEMPS): #only gives the user 3 attempts to log in this is the maximum number of attempts
                 fields = ["Username", "Password"] #fields for username and password
                 values = multenterbox("Enter your login details:", "Log In", fields)
                 if values is None: #if the user cancels the login, exit the loop
@@ -196,8 +196,9 @@ def get_order(menu_items):
 
         #This function adds an item to the cart, increasing its quantity by 1 if it is valid
         def add_item(num):
-            new_qty = cart.get(num, 0) + 1
-            if valid_quantity(new_qty):
+            new_qty = cart.get(num, 0) + 1 #Get the current quantity and increase it by 1
+            if valid_quantity(new_qty): #Check if the new quantity is valid before updating the cart
+
                 cart[num] = new_qty
                 update_summary()
         #This function removes item from cart if it exists, decreasing its quantity by 1
@@ -240,12 +241,12 @@ def get_order(menu_items):
             msgbox("🛒 Your cart is empty.", "Cart Summary")
             return
         history = "Your Current Order:\n"
-        for number in cart: # Iterate through the cart items
+        for number in cart:  # Iterate through the cart items
             item = menu_items[number]
             qty = cart[number]
-            if qty > 0: # Only show items with a quantity greater than 0
-                history += f"{item['name']} x{qty}\n" #add the item name and quantity to the history
-        msgbox(history, "🛒Cart Summary") # Display the cart summary in a message box
+            if qty > 0:  # Only show items with a quantity greater than 0
+                history += f"{item['name']} x{qty}\n"  #add the item name and quantity to the history
+        msgbox(history, "🛒Cart Summary")  # Display the cart summary in a message box
 
         
 
@@ -308,12 +309,15 @@ def display_summary(cart, menu_items):
     if not cart:
         msgbox("You have not ordered anything.")
         return
-
+    
     summary = "Order Summary:\n"
     total = 0
-    for number, quantity in cart.items():
-        item = menu_items[number]
-        cost = item["price"] * quantity
+    #Iterate through the cart items and their quantities
+    for number, quantity in cart.items(): 
+        item = menu_items[number]   #Get the item details from the menu
+        cost = item["price"] * quantity     #Calculate the total cost for this item
+
+        #Format the item name, quantity, and cost into the summary
         summary += f"{item['name']} x{quantity} = ${cost:.2f}\n"
         total += cost
     summary += f"\nTotal Price: ${total:.2f}"
@@ -351,9 +355,11 @@ def display_summary(cart, menu_items):
 
     msgbox(f"✅ Order placed successfully!\n\nOrder Number: #{order_number}\nPickup Time: {pickup_time}")
 
-'''This function is the main entry point of the program, 
+
+
+"""This function is the main entry point of the program, 
 calling the login system, loading the menu, displaying it,
- and managing the order process'''
+ and managing the order process"""
 def main():
     login_system()
     menu_items = load_menu()
