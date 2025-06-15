@@ -39,15 +39,19 @@ current_user = None
 # Load users from file and format them into a dictionary
 def load_users():
     users = {}
-    with open(LOGIN_FILE, "r") as file:
-        for line in file:
-            if line.strip() and "," in line:  # Avoid unpacking order lines
-                try:
-                    username, password = line.strip().split(",") # This formats the file into a dictionary
-                    users[username] = password
-                except ValueError:
-                    continue
+    try:
+        with open(LOGIN_FILE, "r") as file:
+            for line in file:
+                if line.strip() and "," in line:
+                    try:
+                        username, password = line.strip().split(",")
+                        users[username] = password
+                    except ValueError:
+                        continue
+    except FileNotFoundError:
+        msgbox("Login file not found. Please contact admin.")
     return users
+
 
 # Save new user to file
 def save_user(username, password):
