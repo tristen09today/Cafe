@@ -116,8 +116,9 @@ def register_user(users):
         msgbox("Account created successfully!")
         return True
 
-# The login system function handles user login and registration
 def login_system():
+    """Handles user login and registration flow. 
+    Prompts for login or signup and manages login attempts, validation, and user tracking."""
     global current_user
     users = load_users()
     while True:
@@ -190,6 +191,8 @@ def valid_quantity(qty):
 
 # this function manages the cart, allowing users to add, remove, and view items in their order
 def get_order(menu_items):
+    """Manages the user's ordering process.
+    Allows item selection, viewing cart, editing cart, and accessing order history."""
     cart = {}
     # from the menu items, initialize the cart with each item set to 0
     def open_cart_manager(cart, menu_items):
@@ -313,6 +316,9 @@ def history_orders():
 
 #The function displays the order summary, showing the items ordered and their total cost
 def display_summary(cart, menu_items):
+    """Displays the final order summary and lets the user confirm pickup time.
+    Handles cancellation, editing, and saves the order to file if confirmed."""
+
     if not cart:
         msgbox("You have not ordered anything.")
         return
