@@ -39,15 +39,21 @@ current_user = None
 # Load users from file and format them into a dictionary
 def load_users():
     users = {}
-    with open(LOGIN_FILE, "r") as file:
-        for line in file:
-            if line.strip() and "," in line:  # Avoid unpacking order lines
-                try:
-                    username, password = line.strip().split(",") # This formats the file into a dictionary
-                    users[username] = password
-                except ValueError:
-                    continue
+    try:
+        with open(LOGIN_FILE, "r") as file:  # Open the login file in read mode
+            for line in file:
+                if line.strip() and "," in line:  #This checks if the line is not empty and contains a comma
+                    try: #if the line is not empty and contains a comma, split the line into username and password
+                        username, password = line.strip().split(",")
+                        users[username] = password
+                    #If the line does not contain a valid username and password, skip it
+                    except ValueError:
+                       continue
+    # If the file is not found, display an error message               
+    except FileNotFoundError:
+        msgbox("Login file not found. Please contact admin.")
     return users
+
 
 # Save new user to file
 def save_user(username, password):
@@ -56,6 +62,7 @@ def save_user(username, password):
 
 #checks if string length of the password or username, ensuring it meets the specified criteria
 def valid_length(value, min_len, max_len, field_name):
+    """Checks if the provided quantity is within valid ordering range."""
     return min_len <= len(value) <= max_len
 
 #The function register's a new user by collecting their details through a multienterbox.
@@ -84,15 +91,15 @@ def register_user(users):
         #if username already exists, invalid length, or password mismatch, or age add to errmsg
         if username in users:
             errmsg += "Username already exists.\n\n"
-        if not valid_length(username, MIN_USER_LENGTH, MAX_USER_LENGTH, "Username"):
+        if not valid_length(username, MIN_USER_LENGTH, MAX_USER_LENGTH, "Username"): #if username is not valid length not between 3 and 15 characters, add to errmsg
             errmsg += f"Username must be {MIN_USER_LENGTH}-{MAX_USER_LENGTH} characters.\n\n"
 
-        if not valid_length(password, MIN_PASS_LENGTH, MAX_PASS_LENGTH, "Password"):
+        if not valid_length(password, MIN_PASS_LENGTH, MAX_PASS_LENGTH, "Password"):  #If password is not valid length not between 4 and 15 characters, add to errmsg
             errmsg += f"Password must be {MIN_PASS_LENGTH}-{MAX_PASS_LENGTH} characters.\n\n"
-        if password != confirm:
+        if password != confirm:  #password and confirm do not match, add to errmsg
             errmsg += "Passwords do not match.\n\n"
 
-        if not year_str.isdigit():
+        if not year_str.isdigit():  #if year_str is not a digit, add to errmsg
             errmsg += "Year level must be a number.\n\n"
         else:
             year = int(year_str)
@@ -109,8 +116,9 @@ def register_user(users):
         msgbox("Account created successfully!")
         return True
 
-# The login system function handles user login and registration
 def login_system():
+    """Handles user login and registration flow. 
+    Prompts for login or signup and manages login attempts, validation, and user tracking."""
     global current_user
     users = load_users()
     while True:
@@ -124,7 +132,7 @@ def login_system():
             register_user(users)
         #if the user chooses to log in, prompt them for their username and password
         elif action == "Log In":
-            for attempt in range(LOGIN_ATTEMPS): # Allow up to 3 login attempts
+            for attempt in range(LOGIN_ATTEMPS): #only gives the user 3 attempts to log in this is the maximum number of attempts
                 fields = ["Username", "Password"] #fields for username and password
                 values = multenterbox("Enter your login details:", "Log In", fields)
                 if values is None: #if the user cancels the login, exit the loop
@@ -147,6 +155,11 @@ def login_system():
                 exit()
 #loads the menu from menu.txt  
 def load_menu():
+    """Loads menu items from the menu file and returns them as a dictionary.
+    Skips empty lines and lines starting with '#'.
+    Returns:
+        dict: Dictionary of menu items with item number as key, and name/price as values.
+    """
     menu_items = {}
     with open(MENU_FILE, "r") as file: 
         reader = csv.reader(file) #set reader to read the file
@@ -177,16 +190,25 @@ def display_menu(menu_items):
     tk.Button(root, text="Close", command=root.destroy).pack(pady=15)
 
     root.mainloop()
-# checks if the quantity is valid, ensuring it is within the lower and upper limits
+
 def valid_quantity(qty):
+    """Checks if the provided quantity is within
+    the minimum and maximum number of items (1) and (50)."""
     return MIN_QUANTITY <= qty <= MAX_QUANTITY
 
 # this function manages the cart, allowing users to add, remove, and view items in their order
 def get_order(menu_items):
+    """Manages the user's ordering process.
+    Allows item selection, viewing cart, editing cart, and accessing order history."""
     cart = {}
+
     # from the menu items, initialize the cart with each item set to 0
     def open_cart_manager(cart, menu_items):
+        """Opens a Tkinter window to allow the user to edit their cart.
+             Users can add or remove items using buttons. """
+        
         def update_summary():
+            
             summary_text.set("")
             for number in sorted(cart):
                 qty = cart[number] # Get the quantity of each item in the cart
@@ -196,8 +218,9 @@ def get_order(menu_items):
 
         #This function adds an item to the cart, increasing its quantity by 1 if it is valid
         def add_item(num):
-            new_qty = cart.get(num, 0) + 1
-            if valid_quantity(new_qty):
+            new_qty = cart.get(num, 0) + 1 #Get the current quantity and increase it by 1
+            if valid_quantity(new_qty): #Check if the new quantity is valid before updating the cart
+
                 cart[num] = new_qty
                 update_summary()
         #This function removes item from cart if it exists, decreasing its quantity by 1
@@ -236,16 +259,17 @@ def get_order(menu_items):
 
      #This function displays the order history, showing the current items in the cart
     def cart_summary():
+        """Displays a simple summary of the current cart contents in a message box."""
         if not cart:
             msgbox("🛒 Your cart is empty.", "Cart Summary")
             return
         history = "Your Current Order:\n"
-        for number in cart: # Iterate through the cart items
+        for number in cart:  # Iterate through the cart items
             item = menu_items[number]
             qty = cart[number]
-            if qty > 0: # Only show items with a quantity greater than 0
-                history += f"{item['name']} x{qty}\n" #add the item name and quantity to the history
-        msgbox(history, "🛒Cart Summary") # Display the cart summary in a message box
+            if qty > 0:  # Only show items with a quantity greater than 0
+                history += f"{item['name']} x{qty}\n"  #add the item name and quantity to the history
+        msgbox(history, "🛒Cart Summary")  # Display the cart summary in a message box
 
         
 
@@ -305,15 +329,21 @@ def history_orders():
 
 #The function displays the order summary, showing the items ordered and their total cost
 def display_summary(cart, menu_items):
+    """Displays the final order summary and lets the user confirm pickup time.
+    Handles cancellation, editing, and saves the order to file if confirmed."""
+
     if not cart:
         msgbox("You have not ordered anything.")
         return
-
+    
     summary = "Order Summary:\n"
     total = 0
-    for number, quantity in cart.items():
-        item = menu_items[number]
-        cost = item["price"] * quantity
+    #Iterate through the cart items and their quantities
+    for number, quantity in cart.items(): 
+        item = menu_items[number]   #Get the item details from the menu
+        cost = item["price"] * quantity     #Calculate the total cost for this item
+
+        #Format the item name, quantity, and cost into the summary
         summary += f"{item['name']} x{quantity} = ${cost:.2f}\n"
         total += cost
     summary += f"\nTotal Price: ${total:.2f}"
@@ -351,9 +381,11 @@ def display_summary(cart, menu_items):
 
     msgbox(f"✅ Order placed successfully!\n\nOrder Number: #{order_number}\nPickup Time: {pickup_time}")
 
-'''This function is the main entry point of the program, 
+
+
+"""This function is the main entry point of the program, 
 calling the login system, loading the menu, displaying it,
- and managing the order process'''
+ and managing the order process"""
 def main():
     login_system()
     menu_items = load_menu()
